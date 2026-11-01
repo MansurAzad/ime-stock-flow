@@ -188,3 +188,21 @@ function RootComponent() {
     </QueryClientProvider>
   );
 }
+
+function FirstOpenOfflineGate() {
+  const { t } = useT();
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-background px-6">
+      <div className="max-w-sm text-center">
+        <h1 className="font-display text-xl font-bold text-foreground">{t("offlineFirstTitle")}</h1>
+        <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{t("offlineFirstBody")}</p>
+        <button
+          onClick={() => window.location.reload()}
+          className="mt-6 inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
+        >
+          {t("retry")}
+        </button>
+      </div>
+    </div>
+  );
+}
