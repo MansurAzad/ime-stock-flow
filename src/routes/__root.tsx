@@ -144,7 +144,9 @@ function RootComponent() {
     const persister = createAppPersister();
     if (!persister) return;
     const [unsubscribe] = persistQueryClient({
-      queryClient,
+      // Bun's isolated installs give react-query and persist-client separate
+      // physical query-core copies; the QueryClient types are identical at runtime.
+      queryClient: queryClient as never,
       persister,
       buster: CACHE_BUSTER,
       maxAge: 7 * 24 * 60 * 60 * 1000,
