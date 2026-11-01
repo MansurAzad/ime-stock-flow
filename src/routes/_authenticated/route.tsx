@@ -71,6 +71,7 @@ function Layout() {
           </nav>
           <div className="ml-auto flex items-center gap-2">
             <span className="hidden text-xs opacity-80 sm:inline">{me?.profile?.full_name || me?.email} · {me?.isAdmin ? "Admin" : "Salesman"}</span>
+            <BusinessSettings />
             <Button size="sm" variant="secondary" onClick={() => setLang(lang === "bn" ? "en" : "bn")}>{lang === "bn" ? "EN" : "বাং"}</Button>
             <Button size="sm" variant="secondary" onClick={signOut}>{t("signOut")}</Button>
           </div>
