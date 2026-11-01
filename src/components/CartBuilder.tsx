@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useProducts } from "@/lib/me";
+import { useProducts, useSalesmanSummary } from "@/lib/me";
+import { isNetworkFailure, useOnline } from "@/lib/offline";
 import { useT } from "@/lib/i18n";
 import { money } from "@/lib/imei";
 import { ImeiScanner } from "./ImeiScanner";
@@ -23,6 +24,9 @@ export function CartBuilder({
 }) {
   const { t } = useT();
   const { data: products = [] } = useProducts();
+  const online = useOnline();
+  // Salesman's held IMEIs (cached) let sale/return scans be checked while offline.
+  const { data: summary } = useSalesmanSummary(mode === "issue" ? undefined : salesmanId);
   const [pid, setPid] = useState("");
   const [qty, setQty] = useState("1");
   const buttonProducts = products.filter((p) => !p.is_smartphone && (!onlyProductIds || onlyProductIds.includes(p.id)));
@@ -31,6 +35,20 @@ export function CartBuilder({
     if (cart.some((l) => l.imeis.includes(imei))) return { ok: false, message: "duplicate" };
     if (!salesmanId) return { ok: false, message: t("selectSalesman") };
     const { data, error } = await supabase.rpc("check_imei", { _imei: imei, _mode: mode, _salesman: salesmanId });
+    if (error && isNetworkFailure(error, !online)) {
+      // Offline: validate against the salesman's cached held-IMEI list; the
+      // database function re-validates when the queued entry syncs.
+      const held = summary?.handImeis.find((i) => i.imei === imei);
+      if (!held) return { ok: false, message: t("imeiOffline") };
+      const p = products.find((x) => x.id === held.product_id);
+      if (!p) return { ok: false, message: t("imeiOffline") };
+      const next = [...cart];
+      const line = next.find((l) => l.product_id === p.id);
+      if (line) { line.imeis = [...line.imeis, imei]; line.qty = line.imeis.length; }
+      else next.push({ product_id: p.id, name: p.name, isSmart: true, qty: 1, unit_price: Number(p.price), imeis: [imei] });
+      setCart(next);
+      return { ok: true, message: p.name };
+    }
     const r = data as { ok: boolean; reason?: string; product_id?: string; product_name?: string; price?: number } | null;
     if (error || !r?.ok) return { ok: false, message: error?.message ?? r?.reason };
     if (!r.product_id || !r.product_name) return { ok: false, message: t("imeiWrong") };

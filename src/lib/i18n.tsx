@@ -36,6 +36,7 @@ const dict = {
   typeImei: ["IMEI লিখুন", "Type IMEI"],
   imeiOk: ["সঠিক IMEI", "IMEI OK"],
   imeiWrong: ["ভুল IMEI!", "Wrong IMEI!"],
+  imeiOffline: ["অফলাইন: এই IMEI যাচাই করা গেল না", "Offline: cannot verify this IMEI"],
   selectSalesman: ["সেলসম্যান বাছুন", "Select salesman"],
   selectRetailer: ["রিটেইলার বাছুন", "Select retailer"],
   selectProduct: ["প্রোডাক্ট বাছুন", "Select product"],
