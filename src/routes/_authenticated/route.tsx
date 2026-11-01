@@ -4,6 +4,22 @@ import { useMe } from "@/lib/me";
 import { useT, type Key } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import { useQueryClient } from "@tanstack/react-query";
+import { LayoutDashboard, Package, Users, PackageOpen, HandCoins, ShoppingCart, Store, Settings2, type LucideIcon } from "lucide-react";
+import { useState } from "react";
+import { useBusiness } from "@/lib/business";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+
+const navIcon: Partial<Record<Key, LucideIcon>> = {
+  dashboard: LayoutDashboard,
+  products: Package,
+  salesmen: Users,
+  stockIssue: PackageOpen,
+  settlement: HandCoins,
+  sales: ShoppingCart,
+  retailers: Store,
+};
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
@@ -55,19 +71,54 @@ function Layout() {
           </nav>
           <div className="ml-auto flex items-center gap-2">
             <span className="hidden text-xs opacity-80 sm:inline">{me?.profile?.full_name || me?.email} · {me?.isAdmin ? "Admin" : "Salesman"}</span>
+            <BusinessSettings />
             <Button size="sm" variant="secondary" onClick={() => setLang(lang === "bn" ? "en" : "bn")}>{lang === "bn" ? "EN" : "বাং"}</Button>
             <Button size="sm" variant="secondary" onClick={signOut}>{t("signOut")}</Button>
           </div>
         </div>
       </header>
       <main className="mx-auto max-w-6xl px-4 py-6">{me ? <Outlet /> : null}</main>
-      <nav className="fixed inset-x-0 bottom-0 z-20 flex border-t bg-card md:hidden">
-        {nav.map((n) => (
-          <Link key={n.to} to={n.to} className="flex-1 px-1 py-3 text-center text-xs" activeProps={{ className: "font-bold text-primary" }}>
-            {t(n.k)}
-          </Link>
-        ))}
+      <nav className="fixed inset-x-0 bottom-0 z-20 flex border-t bg-card pb-[env(safe-area-inset-bottom)] shadow-[0_-2px_12px_rgba(0,0,0,0.06)] md:hidden">
+        {nav.map((n) => {
+          const Icon = navIcon[n.k] ?? LayoutDashboard;
+          return (
+            <Link
+              key={n.to}
+              to={n.to}
+              className="flex flex-1 flex-col items-center gap-0.5 px-1 py-2 text-[11px] text-muted-foreground"
+              activeProps={{ className: "font-bold text-primary" }}
+            >
+              <Icon className="h-5 w-5" />
+              <span className="leading-tight">{t(n.k)}</span>
+            </Link>
+          );
+        })}
       </nav>
     </div>
+  );
+}
+
+function BusinessSettings() {
+  const { t } = useT();
+  const [open, setOpen] = useState(false);
+  const [business, saveBusiness] = useBusiness();
+  const [f, setF] = useState(business);
+  return (
+    <>
+      <Button size="sm" variant="secondary" title={t("businessInfo")} onClick={() => { setF(business); setOpen(true); }}>
+        <Settings2 className="h-4 w-4" />
+      </Button>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>{t("businessInfo")}</DialogTitle></DialogHeader>
+          <div className="space-y-3">
+            <div className="space-y-1"><Label>{t("name")}</Label><Input value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} /></div>
+            <div className="space-y-1"><Label>{t("address")}</Label><Input value={f.address} onChange={(e) => setF({ ...f, address: e.target.value })} /></div>
+            <div className="space-y-1"><Label>{t("phone")}</Label><Input value={f.phone} onChange={(e) => setF({ ...f, phone: e.target.value })} /></div>
+            <Button className="w-full" onClick={() => { saveBusiness(f); setOpen(false); }}>{t("save")}</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }

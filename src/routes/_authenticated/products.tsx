@@ -7,6 +7,8 @@ import { useProducts } from "@/lib/me";
 import { useT } from "@/lib/i18n";
 import { isValidImeiFormat, money } from "@/lib/imei";
 import { Button } from "@/components/ui/button";
+import { FileSpreadsheet } from "lucide-react";
+import { exportCsv } from "@/lib/export";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
@@ -68,9 +70,22 @@ function Products() {
     setAddQty({ ...addQty, [id]: "" }); refresh();
   }
 
+  function exportStock() {
+    const rows: (string | number)[][] = [[t("name"), t("model"), t("price"), t("items"), t("stock")]];
+    for (const p of products) {
+      rows.push([p.name, p.model ?? "", Number(p.price), p.is_smartphone ? t("smartphone") : t("buttonPhone"), p.is_smartphone ? counts[p.id] ?? 0 : p.stock_qty]);
+    }
+    exportCsv("stock-list.csv", rows, t("stockReport"));
+  }
+
   return (
     <div className="space-y-6">
-      <PageTitle>{t("products")}</PageTitle>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <PageTitle>{t("products")}</PageTitle>
+        <Button size="sm" variant="secondary" onClick={exportStock} disabled={!products.length}>
+          <FileSpreadsheet className="mr-1 h-4 w-4" />{t("export")}
+        </Button>
+      </div>
       <form onSubmit={add} className="grid gap-3 rounded-xl border bg-card p-4 md:grid-cols-6">
         <Input required placeholder={t("name")} value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} />
         <Input placeholder={t("model")} value={f.model} onChange={(e) => setF({ ...f, model: e.target.value })} />

@@ -1,14 +1,23 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { FileSpreadsheet, Printer } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useMe, useRetailers } from "@/lib/me";
 import { useT } from "@/lib/i18n";
 import { money } from "@/lib/imei";
+import { exportCsv } from "@/lib/export";
+import { useBusiness } from "@/lib/business";
+import { fetchSaleItems } from "@/lib/receipt";
+import { LedgerDoc, MoneyReceiptDoc, PrintSheet, SaleReceiptDoc } from "@/components/PrintDocs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PageTitle } from "@/components/Stat";
+
+type SaleRow = { id: string; created_at: string; total: number; paid: number; retailer_id: string };
+type PayRow = { id: string; created_at: string; amount: number; note: string | null; retailer_id: string };
+type RetailerRow = { id: string; name: string; phone: string | null; address: string | null };
 
 export const Route = createFileRoute("/_authenticated/retailers")({
   head: () => ({ meta: [{ title: "রিটেইলার লেজার — মোবাইল হিসাব" }] }),
@@ -20,8 +29,10 @@ function Retailers() {
   const qc = useQueryClient();
   const { data: me } = useMe();
   const { data: retailers = [] } = useRetailers();
+  const [business] = useBusiness();
   const [f, setF] = useState({ name: "", phone: "", address: "" });
   const [open, setOpen] = useState<string | null>(null);
+  const [printDoc, setPrintDoc] = useState<ReactNode | null>(null);
   const { data: ledger } = useQuery({
     queryKey: ["ledger"],
     queryFn: async () => {
@@ -29,9 +40,16 @@ function Retailers() {
         supabase.from("sales").select("*").order("created_at", { ascending: false }),
         supabase.from("retailer_payments").select("*").order("created_at", { ascending: false }),
       ]);
-      return { sales: s.data ?? [], pays: p.data ?? [] };
+      return { sales: (s.data ?? []) as SaleRow[], pays: (p.data ?? []) as PayRow[] };
     },
   });
+
+  const appName = t("appName");
+  const salesOf = (r: RetailerRow) => ledger?.sales.filter((s) => s.retailer_id === r.id) ?? [];
+  const paysOf = (r: RetailerRow) => ledger?.pays.filter((p) => p.retailer_id === r.id) ?? [];
+  const totalOf = (r: RetailerRow) => salesOf(r).reduce((a, s) => a + Number(s.total), 0);
+  const paidOf = (r: RetailerRow) =>
+    salesOf(r).reduce((a, s) => a + Number(s.paid), 0) + paysOf(r).reduce((a, p) => a + Number(p.amount), 0);
 
   async function add(e: React.FormEvent) {
     e.preventDefault();
@@ -41,27 +59,79 @@ function Retailers() {
     qc.invalidateQueries({ queryKey: ["retailers"] });
   }
 
+  function exportAll() {
+    const rows: (string | number)[][] = [[t("name"), t("phone"), t("address"), t("total"), t("paid"), t("due")]];
+    for (const r of retailers) rows.push([r.name, r.phone ?? "", r.address ?? "", totalOf(r), paidOf(r), totalOf(r) - paidOf(r)]);
+    exportCsv("retailer-ledger.csv", rows, t("retailers"));
+  }
+
+  function exportOne(r: RetailerRow) {
+    const rows: (string | number)[][] = [[t("date"), t("items"), t("sales"), t("paid")]];
+    for (const s of salesOf(r)) rows.push([new Date(s.created_at).toLocaleString(), `${t("sales")} (${t("paid")} ${money(s.paid)})`, Number(s.total), Number(s.paid)]);
+    for (const p of paysOf(r)) rows.push([new Date(p.created_at).toLocaleString(), `${t("collectPayment")}${p.note ? ` — ${p.note}` : ""}`, "", Number(p.amount)]);
+    rows.push([], [t("total"), "", totalOf(r), paidOf(r)], [t("due"), "", "", totalOf(r) - paidOf(r)]);
+    exportCsv(`ledger-${r.name}.csv`, rows, r.name);
+  }
+
+  function printLedger(r: RetailerRow) {
+    const entries = [
+      ...salesOf(r).map((s) => ({ date: s.created_at, label: `${t("sales")} (${t("paid")} ${money(s.paid)})`, debit: Number(s.total), credit: 0 })),
+      ...paysOf(r).map((p) => ({ date: p.created_at, label: `${t("collectPayment")}${p.note ? ` — ${p.note}` : ""}`, debit: 0, credit: Number(p.amount) })),
+    ].sort((a, b) => a.date.localeCompare(b.date));
+    setPrintDoc(
+      <LedgerDoc b={business} appName={appName} retailerName={r.name} retailerMeta={[r.phone, r.address].filter(Boolean).join(" · ") || undefined}
+        entries={entries} total={totalOf(r)} paid={paidOf(r)} />,
+    );
+  }
+
+  async function printSaleReceipt(s: SaleRow, r: RetailerRow) {
+    const items = await fetchSaleItems(s.id);
+    setPrintDoc(
+      <SaleReceiptDoc b={business} appName={appName} saleId={s.id} date={s.created_at} retailerName={r.name}
+        retailerMeta={r.phone ?? undefined} items={items} total={Number(s.total)} paid={Number(s.paid)} />,
+    );
+  }
+
+  function printPayReceipt(p: PayRow, r: RetailerRow) {
+    setPrintDoc(
+      <MoneyReceiptDoc b={business} appName={appName} receiptId={p.id} date={p.created_at} fromName={r.name}
+        fromMeta={r.phone ?? undefined} amount={Number(p.amount)} note={p.note} receivedBy={me?.profile?.full_name || ""} />,
+    );
+  }
+
   return (
     <div className="space-y-6">
-      <PageTitle>{t("retailers")} · {t("ledger")}</PageTitle>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <PageTitle>{t("retailers")} · {t("ledger")}</PageTitle>
+        <Button size="sm" variant="secondary" onClick={exportAll} disabled={!retailers.length}>
+          <FileSpreadsheet className="mr-1 h-4 w-4" />{t("export")}
+        </Button>
+      </div>
       {!me?.isAdmin && (
         <form onSubmit={add} className="grid gap-3 rounded-xl border bg-card p-4 md:grid-cols-4">
           <Input required placeholder={t("name")} value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} />
           <Input placeholder={t("phone")} value={f.phone} onChange={(e) => setF({ ...f, phone: e.target.value })} />
-          <Input placeholder="Address" value={f.address} onChange={(e) => setF({ ...f, address: e.target.value })} />
+          <Input placeholder={t("address")} value={f.address} onChange={(e) => setF({ ...f, address: e.target.value })} />
           <Button>{t("add")}</Button>
         </form>
       )}
       <div className="space-y-3">
         {retailers.map((r) => {
-          const sales = ledger?.sales.filter((s) => s.retailer_id === r.id) ?? [];
-          const pays = ledger?.pays.filter((p) => p.retailer_id === r.id) ?? [];
-          const total = sales.reduce((a, s) => a + Number(s.total), 0);
-          const paid = sales.reduce((a, s) => a + Number(s.paid), 0) + pays.reduce((a, p) => a + Number(p.amount), 0);
+          const sales = salesOf(r);
+          const pays = paysOf(r);
+          const total = totalOf(r);
+          const paid = paidOf(r);
+          const entries = [
+            ...sales.map((s) => ({ kind: "sale" as const, at: s.created_at, sale: s })),
+            ...pays.map((p) => ({ kind: "pay" as const, at: p.created_at, pay: p })),
+          ].sort((a, b) => b.at.localeCompare(a.at));
           return (
             <div key={r.id} className="rounded-xl border bg-card p-4">
-              <button className="flex w-full flex-wrap items-center gap-3 text-left" onClick={() => setOpen(open === r.id ? null : r.id)}>
-                <div className="flex-1"><div className="font-display font-bold">{r.name}</div><div className="text-xs text-muted-foreground">{r.phone} {r.address}</div></div>
+              <button className="grid w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-2 text-left sm:flex sm:flex-wrap sm:gap-3" onClick={() => setOpen(open === r.id ? null : r.id)}>
+                <div className="min-w-0 flex-1">
+                  <div className="truncate font-display font-bold">{r.name}</div>
+                  <div className="truncate text-xs text-muted-foreground">{r.phone} {r.address}</div>
+                </div>
                 <span className="text-sm">{t("total")}: {money(total)}</span>
                 <span className="text-sm text-success">{t("paid")}: {money(paid)}</span>
                 <span className="font-bold text-destructive">{t("due")}: {money(total - paid)}</span>
@@ -69,11 +139,28 @@ function Retailers() {
               {open === r.id && (
                 <div className="mt-3 space-y-3 border-t pt-3">
                   {!me?.isAdmin && <PaymentForm retailerId={r.id} max={total - paid} />}
+                  <div className="flex flex-wrap gap-2">
+                    <Button size="sm" variant="secondary" onClick={() => exportOne(r)}><FileSpreadsheet className="mr-1 h-4 w-4" />{t("export")}</Button>
+                    <Button size="sm" variant="secondary" onClick={() => printLedger(r)}><Printer className="mr-1 h-4 w-4" />{t("print")}</Button>
+                  </div>
                   <div className="space-y-1 text-sm">
-                    {[...sales.map((s) => ({ at: s.created_at, txt: `${t("sales")} ${money(s.total)} · ${t("paid")} ${money(s.paid)}` })),
-                      ...pays.map((p) => ({ at: p.created_at, txt: `${t("collectPayment")} ${money(p.amount)}` }))]
-                      .sort((a, b) => b.at.localeCompare(a.at))
-                      .map((x, i) => <div key={i} className="flex justify-between rounded bg-muted px-2 py-1"><span>{x.txt}</span><span className="text-muted-foreground">{new Date(x.at).toLocaleDateString()}</span></div>)}
+                    {entries.map((e) => (
+                      <div key={e.kind + (e.kind === "sale" ? e.sale.id : e.pay.id)} className="flex items-center justify-between gap-2 rounded bg-muted px-2 py-1">
+                        {e.kind === "sale" ? (
+                          <>
+                            <span className="min-w-0 flex-1 truncate">{t("sales")} {money(e.sale.total)} · {t("paid")} {money(e.sale.paid)}</span>
+                            <span className="shrink-0 text-muted-foreground">{new Date(e.at).toLocaleDateString()}</span>
+                            <Button size="sm" variant="ghost" className="h-7 shrink-0 px-2" onClick={() => printSaleReceipt(e.sale, r)} title={t("printReceipt")}><Printer className="h-4 w-4" /></Button>
+                          </>
+                        ) : (
+                          <>
+                            <span className="min-w-0 flex-1 truncate">{t("collectPayment")} {money(e.pay.amount)}{e.pay.note ? ` — ${e.pay.note}` : ""}</span>
+                            <span className="shrink-0 text-muted-foreground">{new Date(e.at).toLocaleDateString()}</span>
+                            <Button size="sm" variant="ghost" className="h-7 shrink-0 px-2" onClick={() => printPayReceipt(e.pay, r)} title={t("printReceipt")}><Printer className="h-4 w-4" /></Button>
+                          </>
+                        )}
+                      </div>
+                    ))}
                   </div>
                 </div>
               )}
@@ -82,6 +169,7 @@ function Retailers() {
         })}
         {retailers.length === 0 && <p className="text-muted-foreground">{t("noData")}</p>}
       </div>
+      {printDoc && <PrintSheet onDone={() => setPrintDoc(null)}>{printDoc}</PrintSheet>}
     </div>
   );
 }

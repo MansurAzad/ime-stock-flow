@@ -38,7 +38,7 @@ function StockIssue() {
     <div className="space-y-4">
       <PageTitle>{t("stockIssue")}</PageTitle>
       <Select value={sid} onValueChange={(v) => { setSid(v); setCart([]); }}>
-        <SelectTrigger className="w-72"><SelectValue placeholder={t("selectSalesman")} /></SelectTrigger>
+        <SelectTrigger className="w-full sm:w-72"><SelectValue placeholder={t("selectSalesman")} /></SelectTrigger>
         <SelectContent>{salesmen.filter((s) => s.active).map((s) => <SelectItem key={s.id} value={s.id}>{s.full_name}</SelectItem>)}</SelectContent>
       </Select>
       {sid && <CartBuilder mode="issue" salesmanId={sid} cart={cart} setCart={setCart} />}
