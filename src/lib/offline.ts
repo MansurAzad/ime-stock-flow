@@ -81,7 +81,7 @@ export type RunResult = { s: "done"; data: unknown } | { s: "queued" } | { s: "e
 
 export async function runOrQueue(op: QueuedOp, offline: boolean): Promise<RunResult> {
   if (!offline) {
-    const { data, error } = (await runOp(op)) as { data?: unknown; error: { message: string } | null };
+    const { data, error } = await runOp(op);
     if (!error) return { s: "done", data };
     if (!isNetworkFailure(error, false)) return { s: "error", error: error.message };
   }

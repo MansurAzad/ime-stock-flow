@@ -11,9 +11,9 @@ describe("offline queue", () => {
     enqueueOp({ kind: "retailer_payment", payload: { retailer_id: "r1", amount: 200 } });
     const q = getQueue();
     expect(q).toHaveLength(2);
-    expect(q[0].op.kind).toBe("deposit");
-    expect(q[1].op.kind).toBe("retailer_payment");
-    expect(q[0].createdAt).toBeTruthy();
+    expect(q[0]?.op.kind).toBe("deposit");
+    expect(q[1]?.op.kind).toBe("retailer_payment");
+    expect(q[0]?.createdAt).toBeTruthy();
   });
 
   it("survives a reload (reads back from local storage)", () => {
