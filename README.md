@@ -1,14 +1,18 @@
-# Welcome to your Lovable project
+# Ime Stock Flow
+
+अच्छा। हमारे stock house के या dealer house के अंदर जो salesman हैं, HR जिन्हें कहा जाता है। आदर्श जन्म। और इसमें moral एवं प्रतिकृति feature हुई है कि नहीं? जो जो विषय गुल तादेर दरकार। जैमन तारा dealer house थे के। Product नहीं जाएगे। एवं product गुलो entry करे जाएगे। कतो गुलो product निच्छे। तार बोर market जाएगे। Market गी ये product गु लो। एवं तादेर dealer दे समस्त हिसाब-निकास तार कासे थाकबे। तार एक कतो माल दिए छे, कतो टाका निए छे, कतो टाका पाबे, कै कतो टाका payment कोल्लो एवं तार तेके कतो टाका payment निलो। Payment नावा system सह... एवं आवार dealer house ए एसे product गुलु जे गुलु बिक्री होय नाई, ओटोमेटिक damage product शेगुलु return कोल्लो। बिक्री जे गुलु होय नाई, शेगुलु return कोल्लो एवं जा बिक्री कोल्लो शे तार टाका दिए दिलो। एवं... जा बाकी आसे शेटा बोल्लो बाकी टाका टा हिसाबे देखालो एवं नगर टाका बोलो दिलो। एवं नगर टाका कोतो टाका नियासे शेटा ओसे तार ओयाते मुरिलो feature लिखते पार्नी। अमारे इस software टीते तादे जन्नो बिस्तारित विषय गुलु दिए। अ, सब विषय गुलु आचे की ना? आगे आमाके शेटा जानाले। एवं तारा product गुलु नियासे जावार समय किसो IME सहो product आचे? आर किसो IME व्यवहार कोरबो ना? शी चार phone, युज गुलु button phone, normal phone, शेटा IME व्यवहार कोरबो ना अमरा। IME व्यवहार ना कर । अब जेकोलो smartphone, शेटा IME व्यवहार करतो होबे। IME हिसाबे mobile गुलु नियासे जाबे IME तोले scan करे। अबार जेको सर नियासे आबे, ताकोन अबार सर नियासे return करबे, शेखानो scan करे शेखो return करबे। अबार scanner टा। Scan करे scan return करबे। जो टा जेतो बाबे जिभे बेबे करात दरकार। एवं scanner ए, validation युक्त करे रहवा। Scanner यदि IME रोंग होय, product तोलार सुमात्र product return करार सोमय ना IME रोंग होले, ताले mobile vibrate करबे एवं लाल signal आसबे। एवं शेत्र विवरण addition करली बार जिदी ठीक ताके ताले सोमय signal आसबे कोनो vibrate करबे ना। बा एवं अधुनिक feature गुलो IME scanner युक्त कर दिबे। IME बार तुम्हारे scanner ए। आशा करी तुम्ही अमारा सब कुछ बुस्तु पे रेचो। अम्म, ए विषय गुलो रोपोर तुम्ही अम्म, अम्म, अम्म, अम्म, अम्म, अम्म, अम्म, �
 
 This project was built with [Lovable](https://lovable.dev).
 
+**Live app**: https://ime-stock-flow.lovable.app
+
 ## Build with Lovable
 
-Open your project in the [Lovable editor](https://lovable.dev) and keep building.
+Continue developing this project in the [Lovable editor](https://lovable.dev/projects/5a959580-4680-4cab-94d9-2133eb3fb278).
 
 - **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: connect the project to GitHub and every change made in Lovable is committed straight to your repository.
-- **Full ownership**: this code is yours. Push to your repository and your changes sync back into Lovable, ready for your next prompt.
+- **Stay in sync**: every change made in Lovable is committed straight to this repository.
+- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
 
 ## Development
 
@@ -20,10 +24,3 @@ cd <repository-name>
 npm i
 npm run dev
 ```
-
-## Built with
-
-- TanStack Start
-- TypeScript
-- React
-- Tailwind CSS
