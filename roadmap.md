@@ -1,4 +1,8 @@
 # Current tasks
+- [x] Add branded PDF export to dashboard overdue dues.
+- [x] Add owner-only AI payment-risk ranking from actual dealer history.
+- [x] Require explicit confirmation and enforce dealer blocking securely.
+- [x] Verify branded print sheet, live AI assessment with temporary dealer, Cancel/no-confirm safeguards, financial SQL and mobile layout; remove verification records.
 - [x] Apply software and company branding across pages and printed documents.
 - [x] Optimize repeated data requests and inspect database performance.
 - [x] Improve mobile layouts and verify all main pages.

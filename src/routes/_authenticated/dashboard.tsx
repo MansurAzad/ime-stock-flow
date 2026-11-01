@@ -8,6 +8,7 @@ import { money } from "@/lib/imei";
 import { PageTitle } from "@/components/Stat";
 import { DashboardAlerts } from "@/components/DashboardAlerts";
 import { DashboardKpis } from "@/components/DashboardKpis";
+import { DealerRiskList } from "@/components/DealerRiskList";
 import { useDashboardInsights } from "@/lib/dashboard";
 import { SalesmanSummary } from "@/components/SalesmanSummary";
 import { Button } from "@/components/ui/button";
@@ -68,7 +69,7 @@ function AdminDash() {
           <FileSpreadsheet className="mr-1 h-4 w-4" />{t("export")}
         </Button>
       </div>
-      {insights && <><DashboardAlerts data={insights} isAdmin /><DashboardKpis data={insights} isAdmin /></>}
+      {insights && <><DashboardAlerts data={insights} isAdmin /><DealerRiskList /><DashboardKpis data={insights} isAdmin /></>}
       <div className="rounded-xl border bg-card p-4">
         <h2 className="mb-3 font-display font-bold">{t("salesmen")}</h2>
         <div className="grid gap-2">
