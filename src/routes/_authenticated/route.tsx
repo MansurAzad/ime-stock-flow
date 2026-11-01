@@ -115,7 +115,7 @@ function BusinessSettings() {
             <div className="space-y-1"><Label>{t("name")}</Label><Input value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} /></div>
             <div className="space-y-1"><Label>{t("address")}</Label><Input value={f.address} onChange={(e) => setF({ ...f, address: e.target.value })} /></div>
             <div className="space-y-1"><Label>{t("phone")}</Label><Input value={f.phone} onChange={(e) => setF({ ...f, phone: e.target.value })} /></div>
-            <Button className="w-full" onClick={() => { saveBusiness(f); setOpen(true); setOpen(false); }}>{t("save")}</Button>
+            <Button className="w-full" onClick={() => { saveBusiness(f); setOpen(false); }}>{t("save")}</Button>
           </div>
         </DialogContent>
       </Dialog>
