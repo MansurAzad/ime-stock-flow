@@ -70,7 +70,7 @@ function Layout() {
       <header className="sticky top-0 z-20 border-b bg-primary text-primary-foreground">
         <div className="mx-auto grid max-w-6xl grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-3 py-3 sm:px-4">
           <div className="flex min-w-0 items-center gap-2.5">
-            <img src={logoAsset.url} alt={t("companyName")} className="h-10 w-10 shrink-0 rounded-md bg-card object-contain p-0.5 sm:h-12 sm:w-12" />
+            <img src={LOGO_URL} alt={t("companyName")} className="h-10 w-10 shrink-0 rounded-md bg-card object-contain p-0.5 sm:h-12 sm:w-12" />
             <div className="min-w-0">
             <div className="break-words font-display text-base font-bold sm:text-lg">{t("companyName")}</div>
             <div className="break-words text-xs leading-relaxed opacity-90 sm:text-sm">{t("appName")}</div>
@@ -93,8 +93,29 @@ function Layout() {
         </div>
       </header>
       <main className="mx-auto min-w-0 max-w-6xl px-3 py-5 sm:px-4">{me ? <Outlet /> : null}</main>
-      <nav className="fixed inset-x-0 bottom-0 z-20 grid auto-cols-fr grid-flow-col border-t bg-card pb-[env(safe-area-inset-bottom)] shadow-sm md:hidden">
-        {nav.map((n) => {
+      <MobileNav nav={nav} />
+    </div>
+  );
+}
+
+/**
+ * Mobile navigation: a fixed bottom bar with at most 4 items (first three
+ * pages + a "More" button) and an auto-hiding side drawer that lists every
+ * page. The drawer closes itself as soon as a page is opened.
+ */
+function MobileNav({ nav }: { nav: { to: string; k: Key }[] }) {
+  const { t } = useT();
+  const [open, setOpen] = useState(false);
+  const currentPath = useRouterState({ select: (r) => r.location.pathname });
+  // Auto-hide the drawer whenever the route changes.
+  useEffect(() => {
+    setOpen(false);
+  }, [currentPath]);
+  const bar = nav.slice(0, 3);
+  return (
+    <>
+      <nav className="fixed inset-x-0 bottom-0 z-20 grid grid-cols-4 border-t bg-card pb-[env(safe-area-inset-bottom)] shadow-sm md:hidden">
+        {bar.map((n) => {
           const Icon = navIcon[n.k] ?? LayoutDashboard;
           return (
             <Link
@@ -108,8 +129,45 @@ function Layout() {
             </Link>
           );
         })}
+        <Sheet open={open} onOpenChange={setOpen}>
+          <SheetTrigger asChild>
+            <button
+              type="button"
+              className="flex min-w-0 flex-col items-center gap-1 px-0.5 py-3 text-[10px] text-muted-foreground sm:text-xs"
+              aria-label={t("menu")}
+            >
+              <Menu className="h-5 w-5 shrink-0" />
+              <span className="break-words text-center leading-tight">{t("more")}</span>
+            </button>
+          </SheetTrigger>
+          <SheetContent side="left" className="w-64 p-0">
+            <SheetHeader className="border-b p-4">
+              <SheetTitle className="flex items-center gap-2">
+                <img src={LOGO_URL} alt={t("companyName")} className="h-8 w-8 shrink-0 rounded-md object-contain" />
+                <span className="min-w-0 truncate text-sm">{t("menu")}</span>
+              </SheetTitle>
+            </SheetHeader>
+            <div className="flex flex-col p-2">
+              {nav.map((n) => {
+                const Icon = navIcon[n.k] ?? LayoutDashboard;
+                return (
+                  <Link
+                    key={n.to}
+                    to={n.to}
+                    onClick={() => setOpen(false)}
+                    className="flex min-w-0 items-center gap-3 rounded-md px-3 py-2.5 text-sm hover:bg-muted"
+                    activeProps={{ className: "bg-accent font-bold text-accent-foreground" }}
+                  >
+                    <Icon className="h-4 w-4 shrink-0" />
+                    <span className="min-w-0 break-words">{t(n.k)}</span>
+                  </Link>
+                );
+              })}
+            </div>
+          </SheetContent>
+        </Sheet>
       </nav>
-    </div>
+    </>
   );
 }
 
