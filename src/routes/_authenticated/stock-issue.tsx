@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { useSalesmen } from "@/lib/me";
+import { useSalesmen, requireAdmin } from "@/lib/me";
 import { useT } from "@/lib/i18n";
 import { CartBuilder, type CartLine } from "@/components/CartBuilder";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { PageTitle } from "@/components/Stat";
 
 export const Route = createFileRoute("/_authenticated/stock-issue")({
+  beforeLoad: requireAdmin,
   head: () => ({ meta: [{ title: "মাল দেওয়া — মোবাইল হিসাব" }] }),
   component: StockIssue,
 });

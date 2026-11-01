@@ -1,5 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
+import { redirect } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
+
+/** Route guard: only admins may proceed; salesmen are sent to their dashboard. */
+export async function requireAdmin() {
+  const { data: u } = await supabase.auth.getUser();
+  if (!u.user) throw redirect({ to: "/auth" });
+  const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", u.user.id);
+  if (!roles?.some((r) => r.role === "admin")) throw redirect({ to: "/dashboard" });
+}
 
 export function useMe() {
   return useQuery({
