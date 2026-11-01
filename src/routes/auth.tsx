@@ -55,14 +55,14 @@ function AuthPage() {
           <div className="mb-1 flex justify-center">
             <img src={logoAsset.url} alt={t("companyName")} className="h-20 w-20 rounded-lg object-contain" />
           </div>
-          <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3">
-            <div className="min-w-0">
+          <div className="relative mb-1">
+            <Button size="sm" variant="ghost" className="absolute right-0 top-0" onClick={() => setLang(lang === "bn" ? "en" : "bn")}>{lang === "bn" ? "EN" : "বাং"}</Button>
+            <div className="text-center">
               <div className="break-words font-display text-xl font-bold text-primary sm:text-2xl">{t("companyName")}</div>
               <CardTitle className="mt-2 break-words text-lg leading-relaxed">{t("appName")}</CardTitle>
+              <p className="mt-2 text-xs leading-relaxed text-muted-foreground">{t("companyAddress")}<br />{t("companyPhone")}</p>
             </div>
-            <Button size="sm" variant="ghost" onClick={() => setLang(lang === "bn" ? "en" : "bn")}>{lang === "bn" ? "EN" : "বাং"}</Button>
           </div>
-          <p className="text-xs leading-relaxed text-muted-foreground">{t("companyAddress")}<br />{t("companyPhone")}</p>
         </CardHeader>
         <CardContent>
           <form onSubmit={submit} className="space-y-4">
