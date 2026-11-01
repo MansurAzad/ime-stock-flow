@@ -77,14 +77,16 @@ async function runOp(op: QueuedOp): Promise<{ error: { message: string } | null 
  * Execute a mutation; when the network is down, store it in the queue instead.
  * Returns "done" | "queued" | { error } so callers can toast accordingly.
  */
-export async function runOrQueue(op: QueuedOp, offline: boolean): Promise<"done" | "queued" | { error: string }> {
+export type RunResult = { s: "done"; data: unknown } | { s: "queued" } | { s: "error"; error: string };
+
+export async function runOrQueue(op: QueuedOp, offline: boolean): Promise<RunResult> {
   if (!offline) {
-    const { error } = await runOp(op);
-    if (!error) return "done";
-    if (!isNetworkFailure(error, false)) return { error: error.message };
+    const { data, error } = (await runOp(op)) as { data?: unknown; error: { message: string } | null };
+    if (!error) return { s: "done", data };
+    if (!isNetworkFailure(error, false)) return { s: "error", error: error.message };
   }
   enqueueOp(op);
-  return "queued";
+  return { s: "queued" };
 }
 
 /** Replay every queued entry in order; stop at the first server rejection so order is preserved. */

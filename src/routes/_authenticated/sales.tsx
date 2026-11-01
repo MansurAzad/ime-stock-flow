@@ -52,10 +52,10 @@ function Sales() {
       },
       !online,
     );
-    if (typeof result === "object") { toast.error(result.error); return; }
-    if (result === "queued") { toast.success(t("savedOffline")); setCart([]); setPaid(""); return; }
+    if (result.s === "error") { toast.error(result.error); return; }
+    if (result.s === "queued") { toast.success(t("savedOffline")); setCart([]); setPaid(""); return; }
     toast.success(t("done"));
-    setLastSale({ id: data as string, retailerId: rid, total, paid: Number(paid || 0), date: new Date().toISOString() });
+    setLastSale({ id: result.data as string, retailerId: rid, total, paid: Number(paid || 0), date: new Date().toISOString() });
     setCart([]); setPaid("");
     qc.invalidateQueries();
   }
