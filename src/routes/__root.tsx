@@ -182,6 +182,7 @@ function RootComponent() {
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <LangProvider>
         <Outlet />
+        {firstOpenBlocked && <FirstOpenOfflineGate />}
         <Toaster richColors position="top-center" />
       </LangProvider>
     </QueryClientProvider>
