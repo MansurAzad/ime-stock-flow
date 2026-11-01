@@ -16,8 +16,8 @@ export function DashboardAlerts({ data, isAdmin }: { data: DashboardInsights; is
     <div className="space-y-5">
       {printing && <PrintSheet onDone={() => setPrinting(false)}><TableDoc b={getBusiness()} appName={t("appName")} title={t("overdueRetailers")} head={[t("retailers"), t("phone"), t("address"), ...(isAdmin ? [t("salesmen")] : []), t("days"), t("overdueBalance"), t("totalDue")]} rows={[...data.overdue.map((r) => [r.name, r.phone ?? "", r.address ?? "", ...(isAdmin ? [r.salesman_name ?? ""] : []), r.age_days, money(r.overdue_amount), money(r.total_due)]), [t("total"), "", "", ...(isAdmin ? [""] : []), "", money(data.overdueTotal), money(data.overdue.reduce((sum, r) => sum + r.total_due, 0))]]} /></PrintSheet>}
       <section className="border-y border-destructive/30 py-4">
-        <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3">
-          <div className="min-w-0">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div className="min-w-0 flex-1 basis-56">
             <h2 className="flex items-start gap-2 text-lg font-bold text-destructive"><AlertTriangle className="mt-1 h-5 w-5 shrink-0" />{t("overdueRetailers")}</h2>
             <p className="mt-1 text-sm text-muted-foreground">{t("overdueBalance")}: <strong className="text-destructive">{money(data.overdueTotal)}</strong> · {data.overdue.length} {t("retailers")}</p>
           </div>
