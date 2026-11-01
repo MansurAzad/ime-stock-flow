@@ -1,7 +1,10 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 
 const dict = {
-  appName: ["মোবাইল ডিস্ট্রিবিউশন হিসাব", "Mobile Distribution Hisab"],
+  appName: ["প্রোডাক্ট ডিস্ট্রিবিউশন ম্যানেজমেন্ট", "Product Distribution Management"],
+  companyName: ["FIROZA ENTERPRISE", "FIROZA ENTERPRISE"],
+  companyAddress: ["KONABARI, GAZIPUR", "KONABARI, GAZIPUR"],
+  companyPhone: ["MOBILE- 01817122232", "MOBILE- 01817122232"],
   dashboard: ["ড্যাশবোর্ড", "Dashboard"],
   products: ["প্রোডাক্ট", "Products"],
   salesmen: ["সেলসম্যান", "Salesmen"],
