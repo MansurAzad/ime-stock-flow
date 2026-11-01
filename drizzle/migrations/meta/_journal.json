@@ -15,6 +15,13 @@
       "when": 1793547369268,
       "tag": "0001_optimize_distribution_reporting",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1793547828682,
+      "tag": "0002_dashboard_alerts_and_kpis",
+      "breakpoints": true
     }
   ]
 }
