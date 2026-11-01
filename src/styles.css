@@ -153,3 +153,35 @@
     color: var(--color-foreground);
   }
 }
+
+/* Print / Save-as-PDF: only the .print-sheet portal renders on paper. */
+.print-sheet {
+  display: none;
+}
+
+@media print {
+  @page {
+    size: A4;
+    margin: 12mm;
+  }
+
+  body * {
+    visibility: hidden;
+  }
+
+  .print-sheet,
+  .print-sheet * {
+    visibility: visible;
+  }
+
+  .print-sheet {
+    display: block;
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    background: #fff;
+    color: #0f172a;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+}
