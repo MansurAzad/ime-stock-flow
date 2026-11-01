@@ -36,7 +36,7 @@ function Sales() {
       _items: cart.map((l) => ({ product_id: l.product_id, qty: l.qty, unit_price: l.unit_price, imeis: l.imeis })),
       _paid: Number(paid || 0),
     });
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     toast.success(t("done"));
     setCart([]); setPaid("");
     qc.invalidateQueries();

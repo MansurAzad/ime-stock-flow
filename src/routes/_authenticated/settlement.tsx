@@ -59,7 +59,7 @@ function ReturnBox({ salesmanId }: { salesmanId: string }) {
       _salesman: salesmanId,
       _items: cart.map((l) => ({ product_id: l.product_id, qty: l.qty, imeis: l.imeis, damaged })),
     });
-    if (error) { navigator.vibrate?.(300); return toast.error(error.message); }
+    if (error) { navigator.vibrate?.(300); { toast.error(error.message); return; } }
     toast.success(t("done"));
     setCart([]);
     qc.invalidateQueries();
@@ -92,7 +92,7 @@ function DepositBox({ salesmanId }: { salesmanId: string }) {
     const n = Number(amt);
     if (n <= 0) return;
     const { error } = await supabase.from("deposits").insert({ salesman_id: salesmanId, amount: n, note: note || null });
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     setAmt(""); setNote(""); toast.success(t("done"));
     qc.invalidateQueries();
   }

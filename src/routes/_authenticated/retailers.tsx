@@ -36,7 +36,7 @@ function Retailers() {
   async function add(e: React.FormEvent) {
     e.preventDefault();
     const { error } = await supabase.from("retailers").insert({ ...f, salesman_id: me!.id });
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     setF({ name: "", phone: "", address: "" });
     qc.invalidateQueries({ queryKey: ["retailers"] });
   }
@@ -93,9 +93,9 @@ function PaymentForm({ retailerId, max }: { retailerId: string; max: number }) {
   async function pay(e: React.FormEvent) {
     e.preventDefault();
     const n = Number(amt);
-    if (n <= 0 || n > max) return toast.error(`${t("due")}: ${money(max)}`);
+    if (n <= 0 || n > max) { toast.error(`${t("due")}: ${money(max)}`); return; }
     const { error } = await supabase.from("retailer_payments").insert({ retailer_id: retailerId, amount: n });
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     setAmt(""); toast.success(t("done"));
     qc.invalidateQueries();
   }
