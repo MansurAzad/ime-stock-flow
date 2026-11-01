@@ -7,6 +7,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { LayoutDashboard, Package, Users, PackageOpen, HandCoins, ShoppingCart, Store, Settings2, type LucideIcon } from "lucide-react";
 import { useState } from "react";
 import { useBusiness } from "@/lib/business";
+import { useOnline, usePendingSyncCount } from "@/lib/offline";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -68,6 +69,7 @@ function Layout() {
             <div className="hidden text-xs opacity-80 sm:block">{t("companyAddress")} · {t("companyPhone")}</div>
           </div>
           <div className="flex shrink-0 items-center gap-1">
+            <SyncBadge />
             <BusinessSettings />
             <Button size="sm" variant="secondary" onClick={() => setLang(lang === "bn" ? "en" : "bn")}>{lang === "bn" ? "EN" : "বাং"}</Button>
             <Button size="sm" variant="secondary" className="px-2" onClick={signOut}>{t("signOut")}</Button>
@@ -99,6 +101,23 @@ function Layout() {
         })}
       </nav>
     </div>
+  );
+}
+
+/** Shows connection status and how many offline entries still need syncing. */
+function SyncBadge() {
+  const { t } = useT();
+  const online = useOnline();
+  const pending = usePendingSyncCount();
+  if (online && pending === 0) return null;
+  return (
+    <span
+      className={`rounded-full px-2 py-1 text-[10px] font-semibold sm:text-xs ${
+        online ? "bg-warning/20 text-foreground" : "bg-destructive/20 text-primary-foreground"
+      }`}
+    >
+      {online ? `${pending} ${t("pendingSync")}` : t("offline") + (pending ? ` · ${pending}` : "")}
+    </span>
   );
 }
 
