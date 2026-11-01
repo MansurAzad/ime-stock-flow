@@ -143,7 +143,7 @@ function RootComponent() {
   useEffect(() => {
     const persister = createAppPersister();
     if (!persister) return;
-    const unsubscribe = persistQueryClient({
+    const [unsubscribe] = persistQueryClient({
       queryClient,
       persister,
       buster: CACHE_BUSTER,
@@ -151,7 +151,9 @@ function RootComponent() {
       dehydrateOptions: { shouldDehydrateQuery: shouldPersistQuery },
     });
     setFirstOpenBlocked(!navigator.onLine && !hasCachedData());
-    return unsubscribe;
+    return () => {
+      unsubscribe();
+    };
   }, [queryClient]);
 
   useEffect(() => {

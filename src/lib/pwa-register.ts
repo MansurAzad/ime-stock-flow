@@ -8,7 +8,7 @@ function isLovablePreviewHost(hostname: string): boolean {
   const previewLabel = /^(?:id-preview|preview)(?:-[a-z0-9]+)?--.+$/;
   for (const suffix of [".lovable.app", ".gpt-eng.com", ".gptengineer.run"]) {
     if (hostname.endsWith(suffix)) {
-      const first = hostname.slice(0, -suffix.length).split(".")[0];
+      const first = hostname.slice(0, -suffix.length).split(".")[0] ?? "";
       if (previewLabel.test(first)) return true;
     }
   }
