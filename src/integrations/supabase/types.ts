@@ -84,6 +84,7 @@ export type Database = {
           created_at: string
           id: string
           is_smartphone: boolean
+          low_stock_threshold: number
           model: string | null
           name: string
           price: number
@@ -93,6 +94,7 @@ export type Database = {
           created_at?: string
           id?: string
           is_smartphone?: boolean
+          low_stock_threshold?: number
           model?: string | null
           name: string
           price?: number
@@ -102,6 +104,7 @@ export type Database = {
           created_at?: string
           id?: string
           is_smartphone?: boolean
+          low_stock_threshold?: number
           model?: string | null
           name?: string
           price?: number
@@ -319,6 +322,7 @@ export type Database = {
         Returns: Json
       }
       distribution_dashboard: { Args: never; Returns: Json }
+      distribution_insights: { Args: never; Returns: Json }
       distribution_stock_counts: { Args: never; Returns: Json }
       has_role: {
         Args: {
