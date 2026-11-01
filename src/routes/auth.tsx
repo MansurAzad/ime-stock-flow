@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useT } from "@/lib/i18n";
+import logoAsset from "@/assets/firoza-logo.png.asset.json";
 
 export const Route = createFileRoute("/auth")({
   head: () => pageHead("লগইন", "Sign in to FIROZA ENTERPRISE Product Distribution Management. KONABARI, GAZIPUR. MOBILE- 01817122232."),
@@ -51,6 +52,9 @@ function AuthPage() {
     <div className="flex min-h-svh items-center justify-center bg-background px-4 py-8">
       <Card className="w-full max-w-md rounded-lg border-t-4 border-t-primary shadow-sm">
         <CardHeader>
+          <div className="mb-1 flex justify-center">
+            <img src={logoAsset.url} alt={t("companyName")} className="h-20 w-20 rounded-lg object-contain" />
+          </div>
           <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3">
             <div className="min-w-0">
               <div className="break-words font-display text-xl font-bold text-primary sm:text-2xl">{t("companyName")}</div>
