@@ -1,4 +1,3 @@
-import type { Query } from "@tanstack/react-query";
 import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
 
 /**
@@ -18,7 +17,7 @@ export function createAppPersister() {
   });
 }
 
-export function shouldPersistQuery(query: Query): boolean {
+export function shouldPersistQuery(query: { state: { status: string }; queryKey: readonly unknown[] }): boolean {
   if (query.state.status !== "success") return false;
   const key = String(query.queryKey[0] ?? "");
   return key !== "me" && !key.includes("risk");
