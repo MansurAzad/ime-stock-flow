@@ -40,7 +40,21 @@ function Products() {
   const [imeiFor, setImeiFor] = useState<string | null>(null);
   const [imeiText, setImeiText] = useState("");
   const [addQty, setAddQty] = useState<Record<string, string>>({});
-  const refresh = () => { qc.invalidateQueries({ queryKey: ["products"] }); qc.invalidateQueries({ queryKey: ["imei-counts"] }); };
+  const [limits, setLimits] = useState<Record<string, string>>({});
+  const [savingLimit, setSavingLimit] = useState<string | null>(null);
+  const refresh = () => { qc.invalidateQueries({ queryKey: ["products"] }); qc.invalidateQueries({ queryKey: ["imei-counts"] }); qc.invalidateQueries({ queryKey: ["dashboard-insights"] }); };
+
+  async function saveLimit(id: string, current: number) {
+    const raw = limits[id] ?? String(current);
+    const limit = Number(raw);
+    if (!raw.trim() || !Number.isInteger(limit) || limit < 0) { toast.error(t("invalidThreshold")); return; }
+    setSavingLimit(id);
+    const { error } = await supabase.from("products").update({ low_stock_threshold: limit }).eq("id", id);
+    setSavingLimit(null);
+    if (error) { toast.error(error.message); return; }
+    toast.success(t("done"));
+    refresh();
+  }
 
   async function add(e: React.FormEvent) {
     e.preventDefault();
@@ -115,6 +129,14 @@ function Products() {
                   <Button size="sm" variant="secondary" onClick={() => addStock(p.id, p.stock_qty)}>+ {t("stock")}</Button>
                 </>
               )}
+            </div>
+            <div className="mt-3 border-t pt-3">
+              <Label htmlFor={`limit-${p.id}`}>{t("stockThreshold")}</Label>
+              <div className="mt-1 grid grid-cols-[minmax(0,1fr)_auto] gap-2">
+                <Input id={`limit-${p.id}`} type="number" min={0} step={1} value={limits[p.id] ?? String(p.low_stock_threshold)} onChange={(e) => setLimits({ ...limits, [p.id]: e.target.value })} />
+                <Button size="sm" variant="outline" disabled={savingLimit === p.id} onClick={() => saveLimit(p.id, p.low_stock_threshold)}>{t("save")}</Button>
+              </div>
+              {p.low_stock_threshold === 0 && <p className="mt-1 text-xs text-muted-foreground">{t("thresholdUnset")}</p>}
             </div>
           </div>
         ))}

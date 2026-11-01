@@ -17,3 +17,6 @@
 - Dashboard and stock counts use security-invoker reporting RPCs so totals aggregate in PostgreSQL without bypassing caller RLS.
 - Shared queries reuse data briefly and mutations invalidate it; do not cache security decisions in browser storage.
 - Blank letterhead settings fall back to the company defaults; explicit saved business settings remain editable.
+- Dashboard insights use a security-invoker RPC; stock-house alerts are owner-only and retailer financial insights retain caller RLS.
+- Age unallocated retailer payments against initial invoice balances oldest-first, ordered by sale timestamp and ID, without storing running balances.
+- Daily and monthly reporting boundaries use the Asia/Dhaka timezone; per-product stock thresholds default to disabled until configured.

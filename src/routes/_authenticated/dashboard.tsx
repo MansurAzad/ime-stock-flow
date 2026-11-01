@@ -2,10 +2,13 @@ import { pageHead } from "@/lib/page-head";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useMe, useProducts, useSalesmen } from "@/lib/me";
+import { useMe, useSalesmen } from "@/lib/me";
 import { useT } from "@/lib/i18n";
 import { money } from "@/lib/imei";
-import { PageTitle, Stat } from "@/components/Stat";
+import { PageTitle } from "@/components/Stat";
+import { DashboardAlerts } from "@/components/DashboardAlerts";
+import { DashboardKpis } from "@/components/DashboardKpis";
+import { useDashboardInsights } from "@/lib/dashboard";
 import { SalesmanSummary } from "@/components/SalesmanSummary";
 import { Button } from "@/components/ui/button";
 import { FileSpreadsheet } from "lucide-react";
@@ -19,13 +22,18 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
 function Dashboard() {
   const { data: me } = useMe();
   const { t } = useT();
+  const insights = useDashboardInsights();
   if (!me) return null;
+  if (insights.isPending) return <p role="status">{t("loading")}</p>;
+  if (insights.isError || !insights.data) return <div className="space-y-3"><p className="text-destructive">{t("loadFailed")}</p><Button onClick={() => insights.refetch()}>{t("retry")}</Button></div>;
   if (!me.isAdmin) {
     return (
-      <>
+      <div className="space-y-6">
         <PageTitle>{t("dashboard")}</PageTitle>
+        <DashboardAlerts data={insights.data} isAdmin={false} />
+        <DashboardKpis data={insights.data} isAdmin={false} />
         <SalesmanSummary salesmanId={me.id} />
-      </>
+      </div>
     );
   }
   return <AdminDash />;
@@ -33,7 +41,7 @@ function Dashboard() {
 
 function AdminDash() {
   const { t } = useT();
-  const { data: products = [] } = useProducts();
+  const { data: insights } = useDashboardInsights();
   const { data: salesmen = [] } = useSalesmen();
   const { data: agg } = useQuery({
     queryKey: ["admin-agg"],
@@ -43,7 +51,6 @@ function AdminDash() {
       return data as unknown as { inStock: number; withSales: number; damaged: number; salesTotal: number; due: number; deposited: number; salesBy: Record<string, number>; paidBy: Record<string, number>; collectedBy: Record<string, number>; depBy: Record<string, number> };
     },
   });
-  const buttonStock = products.filter((p) => !p.is_smartphone).reduce((a, p) => a + p.stock_qty, 0);
   function exportSummary() {
     const rows: (string | number)[][] = [[t("salesmen"), t("sales"), t("deposited"), t("cashInHand")]];
     for (const s of salesmen) {
@@ -61,15 +68,7 @@ function AdminDash() {
           <FileSpreadsheet className="mr-1 h-4 w-4" />{t("export")}
         </Button>
       </div>
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-        <Stat label={`${t("stock")} — ${t("smartphone")}`} value={String(agg?.inStock ?? 0)} />
-        <Stat label={`${t("stock")} — ${t("buttonPhone")}`} value={String(buttonStock)} />
-        <Stat label={`${t("salesmen")} — ${t("inHand")}`} value={String(agg?.withSales ?? 0)} />
-        <Stat label={t("damaged")} value={String(agg?.damaged ?? 0)} tone="bad" />
-        <Stat label={t("sales")} value={money(agg?.salesTotal)} />
-        <Stat label={t("deposited")} value={money(agg?.deposited)} tone="good" />
-        <Stat label={t("retailerDue")} value={money(agg?.due)} tone="bad" />
-      </div>
+      {insights && <><DashboardAlerts data={insights} isAdmin /><DashboardKpis data={insights} isAdmin /></>}
       <div className="rounded-xl border bg-card p-4">
         <h2 className="mb-3 font-display font-bold">{t("salesmen")}</h2>
         <div className="grid gap-2">
