@@ -152,15 +152,17 @@ function RootComponent() {
       maxAge: 7 * 24 * 60 * 60 * 1000,
       dehydrateOptions: { shouldDehydrateQuery: shouldPersistQuery },
     });
-    setFirstOpenBlocked(!navigator.onLine && !hasCachedData());
     return () => {
       unsubscribe();
     };
   }, [queryClient]);
 
   useEffect(() => {
+    setFirstOpenBlocked(!online && !hasCachedData());
+  }, [online]);
+
+  useEffect(() => {
     if (!online) return;
-    setFirstOpenBlocked(false);
     // Connection is back: push any entries saved while offline.
     void replayQueue().then(({ synced, failed }) => {
       if (synced > 0) {
