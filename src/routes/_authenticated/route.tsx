@@ -1,11 +1,11 @@
-import { createFileRoute, Link, Outlet, redirect, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, Outlet, redirect, useNavigate, useRouterState } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { useMe } from "@/lib/me";
 import { useT, type Key } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import { useQueryClient } from "@tanstack/react-query";
-import { LayoutDashboard, Package, Users, PackageOpen, HandCoins, ShoppingCart, Store, Settings2, type LucideIcon } from "lucide-react";
-import { useState } from "react";
+import { LayoutDashboard, Menu, Package, Users, PackageOpen, HandCoins, ShoppingCart, Store, Settings2, type LucideIcon } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useBusiness } from "@/lib/business";
 import { useOnline, usePendingSyncCount } from "@/lib/offline";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
