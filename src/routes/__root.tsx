@@ -89,6 +89,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "description", content: "FIROZA ENTERPRISE — KONABARI, GAZIPUR. MOBILE- 01817122232. Product distribution and accounts." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "theme-color", content: "#1f6f78" },
+      { name: "mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-status-bar-style", content: "default" },
+      { name: "apple-mobile-web-app-title", content: "FIROZA ENT." },
           ],
     links: [
       {
@@ -126,6 +131,42 @@ function RootShell({ children }: { children: ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const router = useRouter();
+  const online = useOnline();
+  // First-open validation: without internet and without any locally saved
+  // data there is nothing to show, so block with a clear message.
+  const [firstOpenBlocked, setFirstOpenBlocked] = useState(false);
+
+  useEffect(() => {
+    void registerAppSW();
+  }, []);
+
+  useEffect(() => {
+    const persister = createAppPersister();
+    if (!persister) return;
+    const unsubscribe = persistQueryClient({
+      queryClient,
+      persister,
+      buster: CACHE_BUSTER,
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+      dehydrateOptions: { shouldDehydrateQuery: shouldPersistQuery },
+    });
+    setFirstOpenBlocked(!navigator.onLine && !hasCachedData());
+    return unsubscribe;
+  }, [queryClient]);
+
+  useEffect(() => {
+    if (!online) return;
+    setFirstOpenBlocked(false);
+    // Connection is back: push any entries saved while offline.
+    void replayQueue().then(({ synced, failed }) => {
+      if (synced > 0) {
+        toast.success(`Offline: ${synced} ✓`);
+        queryClient.invalidateQueries();
+      }
+      if (failed) toast.error(failed);
+    });
+  }, [online, queryClient]);
+
   useEffect(() => {
     const { data } = supabase.auth.onAuthStateChange((event) => {
       if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;
