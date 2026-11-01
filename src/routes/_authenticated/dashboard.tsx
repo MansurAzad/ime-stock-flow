@@ -1,0 +1,95 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useMe, useProducts, useSalesmen } from "@/lib/me";
+import { useT } from "@/lib/i18n";
+import { money } from "@/lib/imei";
+import { PageTitle, Stat } from "@/components/Stat";
+import { SalesmanSummary } from "@/components/SalesmanSummary";
+
+export const Route = createFileRoute("/_authenticated/dashboard")({
+  head: () => ({ meta: [{ title: "ড্যাশবোর্ড — মোবাইল হিসাব" }] }),
+  component: Dashboard,
+});
+
+function Dashboard() {
+  const { data: me } = useMe();
+  const { t } = useT();
+  if (!me) return null;
+  if (!me.isAdmin) {
+    return (
+      <>
+        <PageTitle>{t("dashboard")}</PageTitle>
+        <SalesmanSummary salesmanId={me.id} />
+      </>
+    );
+  }
+  return <AdminDash />;
+}
+
+function AdminDash() {
+  const { t } = useT();
+  const { data: products = [] } = useProducts();
+  const { data: salesmen = [] } = useSalesmen();
+  const { data: agg } = useQuery({
+    queryKey: ["admin-agg"],
+    queryFn: async () => {
+      const [imeis, sales, pays, deps] = await Promise.all([
+        supabase.from("imei_units").select("status"),
+        supabase.from("sales").select("total, paid, salesman_id"),
+        supabase.from("retailer_payments").select("amount, salesman_id"),
+        supabase.from("deposits").select("amount, salesman_id"),
+      ]);
+      const sum = (a: { [k: string]: unknown }[] | null, k: string) => (a ?? []).reduce((s, r) => s + Number(r[k]), 0);
+      const by = (rows: { salesman_id: string; [k: string]: unknown }[] | null, k: string) => {
+        const m: Record<string, number> = {};
+        for (const r of rows ?? []) m[r.salesman_id] = (m[r.salesman_id] ?? 0) + Number(r[k]);
+        return m;
+      };
+      return {
+        inStock: (imeis.data ?? []).filter((i) => i.status === "in_stock").length,
+        withSales: (imeis.data ?? []).filter((i) => i.status === "with_salesman").length,
+        damaged: (imeis.data ?? []).filter((i) => i.status === "damaged").length,
+        salesTotal: sum(sales.data, "total"),
+        due: sum(sales.data, "total") - sum(sales.data, "paid") - sum(pays.data, "amount"),
+        deposited: sum(deps.data, "amount"),
+        salesBy: by(sales.data, "total"),
+        paidBy: by(sales.data, "paid"),
+        collectedBy: by(pays.data, "amount"),
+        depBy: by(deps.data, "amount"),
+      };
+    },
+  });
+  const buttonStock = products.filter((p) => !p.is_smartphone).reduce((a, p) => a + p.stock_qty, 0);
+  return (
+    <div className="space-y-6">
+      <PageTitle>{t("dashboard")}</PageTitle>
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+        <Stat label={`${t("stock")} — ${t("smartphone")}`} value={String(agg?.inStock ?? 0)} />
+        <Stat label={`${t("stock")} — ${t("buttonPhone")}`} value={String(buttonStock)} />
+        <Stat label={`${t("salesmen")} — ${t("inHand")}`} value={String(agg?.withSales ?? 0)} />
+        <Stat label={t("damaged")} value={String(agg?.damaged ?? 0)} tone="bad" />
+        <Stat label={t("sales")} value={money(agg?.salesTotal)} />
+        <Stat label={t("deposited")} value={money(agg?.deposited)} tone="good" />
+        <Stat label={t("retailerDue")} value={money(agg?.due)} tone="bad" />
+      </div>
+      <div className="rounded-xl border bg-card p-4">
+        <h2 className="mb-3 font-display font-bold">{t("salesmen")}</h2>
+        <div className="grid gap-2">
+          {salesmen.map((s) => {
+            const cash = (agg?.paidBy[s.id] ?? 0) + (agg?.collectedBy[s.id] ?? 0) - (agg?.depBy[s.id] ?? 0);
+            return (
+              <div key={s.id} className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-muted px-3 py-2 text-sm">
+                <span className="font-semibold">{s.full_name}</span>
+                <span>{t("sales")}: {money(agg?.salesBy[s.id])}</span>
+                <span>{t("deposited")}: {money(agg?.depBy[s.id])}</span>
+                <span className="font-bold text-accent-foreground">{t("cashInHand")}: {money(cash)}</span>
+              </div>
+            );
+          })}
+          {salesmen.length === 0 && <p className="text-sm text-muted-foreground">{t("noData")}</p>}
+        </div>
+      </div>
+    </div>
+  );
+}
