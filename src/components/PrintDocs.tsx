@@ -57,7 +57,7 @@ export function SaleReceiptDoc({
   b, appName, saleId, date, retailerName, retailerMeta, items, total, paid,
 }: {
   b: Business; appName: string; saleId: string; date: string;
-  retailerName: string; retailerMeta?: string; items: ReceiptItem[]; total: number; paid: number;
+  retailerName: string; retailerMeta?: string | undefined; items: ReceiptItem[]; total: number; paid: number;
 }) {
   const { t } = useT();
   return (
@@ -104,7 +104,7 @@ export function MoneyReceiptDoc({
   b, appName, receiptId, date, fromName, fromMeta, amount, note, receivedBy,
 }: {
   b: Business; appName: string; receiptId: string; date: string;
-  fromName: string; fromMeta?: string; amount: number; note?: string | null; receivedBy: string;
+  fromName: string; fromMeta?: string | undefined; amount: number; note?: string | null | undefined; receivedBy: string;
 }) {
   const { t } = useT();
   return (
@@ -130,7 +130,7 @@ export function MoneyReceiptDoc({
 export function LedgerDoc({
   b, appName, retailerName, retailerMeta, entries, total, paid,
 }: {
-  b: Business; appName: string; retailerName: string; retailerMeta?: string;
+  b: Business; appName: string; retailerName: string; retailerMeta?: string | undefined;
   entries: { date: string; label: string; debit: number; credit: number }[];
   total: number; paid: number;
 }) {
