@@ -3,13 +3,12 @@ import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { useMe } from "@/lib/me";
+import { useMe, useRetailers } from "@/lib/me";
 import { useT } from "@/lib/i18n";
 import { money } from "@/lib/imei";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PageTitle } from "@/components/Stat";
-import { useRetailers } from "./sales";
 
 export const Route = createFileRoute("/_authenticated/retailers")({
   head: () => ({ meta: [{ title: "রিটেইলার লেজার — মোবাইল হিসাব" }] }),
@@ -37,7 +36,7 @@ function Retailers() {
   async function add(e: React.FormEvent) {
     e.preventDefault();
     const { error } = await supabase.from("retailers").insert({ ...f, salesman_id: me!.id });
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     setF({ name: "", phone: "", address: "" });
     qc.invalidateQueries({ queryKey: ["retailers"] });
   }
@@ -94,9 +93,9 @@ function PaymentForm({ retailerId, max }: { retailerId: string; max: number }) {
   async function pay(e: React.FormEvent) {
     e.preventDefault();
     const n = Number(amt);
-    if (n <= 0 || n > max) return toast.error(`${t("due")}: ${money(max)}`);
+    if (n <= 0 || n > max) { toast.error(`${t("due")}: ${money(max)}`); return; }
     const { error } = await supabase.from("retailer_payments").insert({ retailer_id: retailerId, amount: n });
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     setAmt(""); toast.success(t("done"));
     qc.invalidateQueries();
   }

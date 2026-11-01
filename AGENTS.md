@@ -8,3 +8,8 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+## App rules
+- Stock, sale and return changes go only through the database functions (issue_stock, record_sale, return_stock, check_imei); never write imei_units/stock_movements directly from the client — they enforce IMEI status validation.
+- Salesman balances are derived from stock_movements, sales, retailer_payments and deposits (see src/lib/me.ts); do not store running totals.
+- UI strings live in src/lib/i18n.tsx (Bengali + English pairs).

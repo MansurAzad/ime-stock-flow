@@ -5,7 +5,7 @@ import { useT } from "@/lib/i18n";
 import { extractImei, isValidImeiFormat, signalFeedback } from "@/lib/imei";
 import { cn } from "@/lib/utils";
 
-export type ScanResult = { ok: boolean; message?: string };
+export type ScanResult = { ok: boolean; message?: string | undefined };
 
 /**
  * Camera + manual IMEI input. `validate` decides if the IMEI is acceptable;

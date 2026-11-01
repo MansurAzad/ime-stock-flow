@@ -28,7 +28,7 @@ function StockIssue() {
       _salesman: sid,
       _items: cart.map((l) => ({ product_id: l.product_id, qty: l.qty, imeis: l.imeis })),
     });
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     toast.success(t("done"));
     setCart([]);
     qc.invalidateQueries();

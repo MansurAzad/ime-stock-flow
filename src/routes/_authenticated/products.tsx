@@ -45,7 +45,7 @@ function Products() {
       name: f.name, model: f.model || null, price: Number(f.price || 0), is_smartphone: f.is_smartphone,
       stock_qty: f.is_smartphone ? 0 : Number(f.stock_qty || 0),
     });
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     setF({ name: "", model: "", price: "", is_smartphone: true, stock_qty: "" });
     refresh();
   }
@@ -53,9 +53,9 @@ function Products() {
   async function saveImeis() {
     const list = [...new Set(imeiText.split(/[\s,]+/).map((s) => s.trim()).filter(Boolean))];
     const bad = list.filter((i) => !isValidImeiFormat(i));
-    if (bad.length) { navigator.vibrate?.(300); return toast.error(`${t("imeiWrong")} ${bad.join(", ")}`); }
+    if (bad.length) { navigator.vibrate?.(300); { toast.error(`${t("imeiWrong")} ${bad.join(", ")}`); return; } }
     const { error } = await supabase.from("imei_units").insert(list.map((imei) => ({ imei, product_id: imeiFor! })));
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     toast.success(`${list.length} IMEI ${t("done")}`);
     setImeiFor(null); setImeiText(""); refresh();
   }
@@ -64,7 +64,7 @@ function Products() {
     const n = Number(addQty[id] || 0);
     if (!n) return;
     const { error } = await supabase.from("products").update({ stock_qty: current + n }).eq("id", id);
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     setAddQty({ ...addQty, [id]: "" }); refresh();
   }
 
