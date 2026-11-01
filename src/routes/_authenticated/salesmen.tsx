@@ -4,7 +4,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { useSalesmen } from "@/lib/me";
+import { useSalesmen, requireAdmin } from "@/lib/me";
 import { useT } from "@/lib/i18n";
 import { createSalesman } from "@/lib/salesmen.functions";
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,7 @@ import { PageTitle } from "@/components/Stat";
 import { SalesmanSummary } from "@/components/SalesmanSummary";
 
 export const Route = createFileRoute("/_authenticated/salesmen")({
+  beforeLoad: requireAdmin,
   head: () => ({ meta: [{ title: "সেলসম্যান — মোবাইল হিসাব" }] }),
   component: Salesmen,
 });

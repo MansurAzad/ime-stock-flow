@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { useProducts } from "@/lib/me";
+import { useProducts, requireAdmin } from "@/lib/me";
 import { useT } from "@/lib/i18n";
 import { isValidImeiFormat, money } from "@/lib/imei";
 import { Button } from "@/components/ui/button";
@@ -18,6 +18,7 @@ import { PageTitle } from "@/components/Stat";
 import { useQuery } from "@tanstack/react-query";
 
 export const Route = createFileRoute("/_authenticated/products")({
+  beforeLoad: requireAdmin,
   head: () => ({ meta: [{ title: "প্রোডাক্ট — মোবাইল হিসাব" }] }),
   component: Products,
 });
