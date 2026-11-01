@@ -61,6 +61,19 @@ const dict = {
   active: ["সক্রিয়", "Active"],
   newSalesman: ["নতুন সেলসম্যান", "New salesman"],
   date: ["তারিখ", "Date"],
+  export: ["এক্সেল", "Excel"],
+  print: ["প্রিন্ট / PDF", "Print / PDF"],
+  receipt: ["রশিদ", "Receipt"],
+  saleInvoice: ["বিক্রয় ইনভয়েস", "Sales Invoice"],
+  moneyReceipt: ["মানি রশিদ", "Money Receipt"],
+  settlementReport: ["হিসাব-মেলানো রিপোর্ট", "Settlement Report"],
+  stockReport: ["স্টক রিপোর্ট", "Stock Report"],
+  businessInfo: ["ব্যবসার নাম-ঠিকানা (প্যাড)", "Business name & address (letterhead)"],
+  address: ["ঠিকানা", "Address"],
+  receivedFrom: ["যার কাছ থেকে পেলাম", "Received from"],
+  businessOwner: ["মালিক / ডিলার হাউস", "Owner / Dealer house"],
+  printReceipt: ["রশিদ প্রিন্ট", "Print receipt"],
+  owesDealer: ["ডিলার হাউস পাবে", "Owes dealer house"],
 } as const;
 
 export type Key = keyof typeof dict;
