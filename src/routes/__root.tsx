@@ -81,8 +81,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "মোবাইল ডিস্ট্রিবিউশন হিসাব" },
-      { name: "description", content: "Dealer house stock, salesman hisab, IMEI scanner and retailer ledger." },
+      { title: "প্রোডাক্ট ডিস্ট্রিবিউশন ম্যানেজমেন্ট | FIROZA ENTERPRISE" },
+      { name: "description", content: "FIROZA ENTERPRISE — KONABARI, GAZIPUR. MOBILE- 01817122232. Product distribution and accounts." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
           ],

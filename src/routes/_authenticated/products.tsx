@@ -1,3 +1,4 @@
+import { pageHead } from "@/lib/page-head";
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -19,7 +20,7 @@ import { useQuery } from "@tanstack/react-query";
 
 export const Route = createFileRoute("/_authenticated/products")({
   beforeLoad: requireAdmin,
-  head: () => ({ meta: [{ title: "প্রোডাক্ট — মোবাইল হিসাব" }] }),
+  head: () => pageHead("প্রোডাক্ট", "FIROZA ENTERPRISE products, phone stock and IMEI inventory."),
   component: Products,
 });
 
@@ -30,10 +31,9 @@ function Products() {
   const { data: counts = {} } = useQuery({
     queryKey: ["imei-counts"],
     queryFn: async () => {
-      const { data } = await supabase.from("imei_units").select("product_id").eq("status", "in_stock");
-      const m: Record<string, number> = {};
-      for (const r of data ?? []) m[r.product_id] = (m[r.product_id] ?? 0) + 1;
-      return m;
+      const { data, error } = await supabase.rpc("distribution_stock_counts");
+      if (error) throw error;
+      return data as Record<string, number>;
     },
   });
   const [f, setF] = useState({ name: "", model: "", price: "", is_smartphone: true, stock_qty: "" });
@@ -54,10 +54,11 @@ function Products() {
   }
 
   async function saveImeis() {
+    if (!imeiFor) return;
     const list = [...new Set(imeiText.split(/[\s,]+/).map((s) => s.trim()).filter(Boolean))];
     const bad = list.filter((i) => !isValidImeiFormat(i));
     if (bad.length) { navigator.vibrate?.(300); { toast.error(`${t("imeiWrong")} ${bad.join(", ")}`); return; } }
-    const { error } = await supabase.from("imei_units").insert(list.map((imei) => ({ imei, product_id: imeiFor! })));
+    const { error } = await supabase.from("imei_units").insert(list.map((imei) => ({ imei, product_id: imeiFor })));
     if (error) { toast.error(error.message); return; }
     toast.success(`${list.length} IMEI ${t("done")}`);
     setImeiFor(null); setImeiText(""); refresh();
@@ -98,8 +99,8 @@ function Products() {
       <div className="grid gap-3 md:grid-cols-2">
         {products.map((p) => (
           <div key={p.id} className="rounded-xl border bg-card p-4">
-            <div className="flex items-start justify-between">
-              <div>
+            <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3">
+              <div className="min-w-0 break-words">
                 <div className="font-display text-lg font-bold">{p.name} <span className="text-sm font-normal text-muted-foreground">{p.model}</span></div>
                 <div className="text-sm text-muted-foreground">{p.is_smartphone ? t("smartphone") : t("buttonPhone")} · {money(p.price)}</div>
               </div>

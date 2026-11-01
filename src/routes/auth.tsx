@@ -1,3 +1,4 @@
+import { pageHead } from "@/lib/page-head";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -9,14 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useT } from "@/lib/i18n";
 
 export const Route = createFileRoute("/auth")({
-  head: () => ({
-    meta: [
-      { title: "লগইন — মোবাইল ডিস্ট্রিবিউশন হিসাব" },
-      { name: "description", content: "Sign in to manage dealer stock and salesman accounts." },
-      { property: "og:title", content: "Sign in — Mobile Distribution Hisab" },
-      { property: "og:description", content: "Sign in to manage dealer stock and salesman accounts." },
-    ],
-  }),
+  head: () => pageHead("লগইন", "Sign in to FIROZA ENTERPRISE Product Distribution Management. KONABARI, GAZIPUR. MOBILE- 01817122232."),
   component: AuthPage,
 });
 
@@ -54,16 +48,17 @@ function AuthPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-primary/15 via-background to-accent/20 px-4">
-      <Card className="w-full max-w-md shadow-xl">
+    <div className="flex min-h-svh items-center justify-center bg-background px-4 py-8">
+      <Card className="w-full max-w-md rounded-lg border-t-4 border-t-primary shadow-sm">
         <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="font-display text-2xl">📱 {t("appName")}</CardTitle>
+          <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3">
+            <div className="min-w-0">
+              <div className="break-words font-display text-xl font-bold text-primary sm:text-2xl">{t("companyName")}</div>
+              <CardTitle className="mt-2 break-words text-lg leading-relaxed">{t("appName")}</CardTitle>
+            </div>
             <Button size="sm" variant="ghost" onClick={() => setLang(lang === "bn" ? "en" : "bn")}>{lang === "bn" ? "EN" : "বাং"}</Button>
           </div>
-          <p className="text-sm text-muted-foreground">
-            {lang === "bn" ? "প্রথম অ্যাকাউন্টটি মালিক (Admin) হবে। সেলসম্যানদের অ্যাকাউন্ট মালিক তৈরি করে দেবেন।" : "The first account becomes the owner (Admin). The owner creates salesman accounts."}
-          </p>
+          <p className="text-xs leading-relaxed text-muted-foreground">{t("companyAddress")}<br />{t("companyPhone")}</p>
         </CardHeader>
         <CardContent>
           <form onSubmit={submit} className="space-y-4">
@@ -73,9 +68,9 @@ function AuthPage() {
             <div className="space-y-1"><Label>{t("email")}</Label><Input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} /></div>
             <div className="space-y-1"><Label>{t("password")}</Label><Input type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} /></div>
             <Button className="w-full" disabled={loading}>{mode === "in" ? t("signIn") : t("signUp")}</Button>
-            <button type="button" className="w-full text-sm text-primary underline" onClick={() => setMode(mode === "in" ? "up" : "in")}>
+            <Button type="button" variant="link" className="w-full" onClick={() => setMode(mode === "in" ? "up" : "in")}>
               {mode === "in" ? t("signUp") : t("signIn")}
-            </button>
+            </Button>
           </form>
         </CardContent>
       </Card>

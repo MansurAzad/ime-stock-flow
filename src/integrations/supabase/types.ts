@@ -318,6 +318,8 @@ export type Database = {
         Args: { _imei: string; _mode: string; _salesman: string }
         Returns: Json
       }
+      distribution_dashboard: { Args: never; Returns: Json }
+      distribution_stock_counts: { Args: never; Returns: Json }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

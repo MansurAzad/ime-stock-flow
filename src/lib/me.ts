@@ -56,14 +56,18 @@ export function useSalesmanSummary(salesmanId: string | undefined) {
     enabled: !!salesmanId,
     queryKey: ["summary", salesmanId],
     queryFn: async () => {
-      const id = salesmanId!;
+      const id = salesmanId;
+      if (!id) throw new Error("Salesman required");
       const [moves, sales, pays, deps, imeis] = await Promise.all([
-        supabase.from("stock_movements").select("*, products(name,is_smartphone)").eq("salesman_id", id),
-        supabase.from("sales").select("*").eq("salesman_id", id),
-        supabase.from("retailer_payments").select("*").eq("salesman_id", id),
+        supabase.from("stock_movements").select("product_id,kind,qty,unit_price, products(name,is_smartphone)").eq("salesman_id", id),
+        supabase.from("sales").select("total,paid").eq("salesman_id", id),
+        supabase.from("retailer_payments").select("amount").eq("salesman_id", id),
         supabase.from("deposits").select("*").eq("salesman_id", id).order("created_at", { ascending: false }),
         supabase.from("imei_units").select("imei, product_id, status").eq("salesman_id", id).eq("status", "with_salesman"),
       ]);
+      for (const result of [moves, sales, pays, deps, imeis]) {
+        if (result.error) throw result.error;
+      }
       const byProduct: Record<string, { name: string; isSmart: boolean; issued: number; sold: number; returned: number; damaged: number; hand: number; value: number }> = {};
       for (const m of moves.data ?? []) {
         const p = (byProduct[m.product_id] ??= {

@@ -1,3 +1,4 @@
+import { pageHead } from "@/lib/page-head";
 import { createFileRoute } from "@tanstack/react-router";
 import { useState, type ReactNode } from "react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -18,7 +19,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { PageTitle } from "@/components/Stat";
 
 export const Route = createFileRoute("/_authenticated/sales")({
-  head: () => ({ meta: [{ title: "বিক্রি — মোবাইল হিসাব" }] }),
+  head: () => pageHead("বিক্রি", "FIROZA ENTERPRISE retailer sales, payments and invoices."),
   component: Sales,
 });
 

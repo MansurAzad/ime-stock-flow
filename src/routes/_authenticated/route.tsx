@@ -60,36 +60,39 @@ function Layout() {
   return (
     <div className="min-h-screen pb-20 md:pb-0">
       <header className="sticky top-0 z-20 border-b bg-primary text-primary-foreground">
-        <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-3">
-          <span className="font-display text-lg font-bold">📱 {t("appName")}</span>
-          <nav className="ml-4 hidden gap-1 md:flex">
+        <div className="mx-auto grid max-w-6xl grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-3 py-3 sm:px-4">
+          <div className="min-w-0">
+            <div className="break-words font-display text-base font-bold sm:text-lg">{t("companyName")}</div>
+            <div className="break-words text-xs leading-relaxed opacity-90 sm:text-sm">{t("appName")}</div>
+            <div className="hidden text-xs opacity-80 sm:block">{t("companyAddress")} · {t("companyPhone")}</div>
+          </div>
+          <div className="flex shrink-0 items-center gap-1">
+            <BusinessSettings />
+            <Button size="sm" variant="secondary" onClick={() => setLang(lang === "bn" ? "en" : "bn")}>{lang === "bn" ? "EN" : "বাং"}</Button>
+            <Button size="sm" variant="secondary" className="px-2" onClick={signOut}>{t("signOut")}</Button>
+          </div>
+          <nav className="col-span-2 hidden flex-wrap gap-1 md:flex">
             {nav.map((n) => (
               <Link key={n.to} to={n.to} className="rounded-md px-3 py-1.5 text-sm hover:bg-primary-foreground/10" activeProps={{ className: "bg-accent text-accent-foreground" }}>
                 {t(n.k)}
               </Link>
             ))}
           </nav>
-          <div className="ml-auto flex items-center gap-2">
-            <span className="hidden text-xs opacity-80 sm:inline">{me?.profile?.full_name || me?.email} · {me?.isAdmin ? "Admin" : "Salesman"}</span>
-            <BusinessSettings />
-            <Button size="sm" variant="secondary" onClick={() => setLang(lang === "bn" ? "en" : "bn")}>{lang === "bn" ? "EN" : "বাং"}</Button>
-            <Button size="sm" variant="secondary" onClick={signOut}>{t("signOut")}</Button>
-          </div>
         </div>
       </header>
-      <main className="mx-auto max-w-6xl px-4 py-6">{me ? <Outlet /> : null}</main>
-      <nav className="fixed inset-x-0 bottom-0 z-20 flex border-t bg-card pb-[env(safe-area-inset-bottom)] shadow-[0_-2px_12px_rgba(0,0,0,0.06)] md:hidden">
+      <main className="mx-auto min-w-0 max-w-6xl px-3 py-5 sm:px-4">{me ? <Outlet /> : null}</main>
+      <nav className="fixed inset-x-0 bottom-0 z-20 grid auto-cols-fr grid-flow-col border-t bg-card pb-[env(safe-area-inset-bottom)] shadow-sm md:hidden">
         {nav.map((n) => {
           const Icon = navIcon[n.k] ?? LayoutDashboard;
           return (
             <Link
               key={n.to}
               to={n.to}
-              className="flex flex-1 flex-col items-center gap-0.5 px-1 py-2 text-[11px] text-muted-foreground"
+              className="flex min-w-0 flex-col items-center gap-1 px-0.5 py-3 text-[10px] text-muted-foreground sm:text-xs"
               activeProps={{ className: "font-bold text-primary" }}
             >
-              <Icon className="h-5 w-5" />
-              <span className="leading-tight">{t(n.k)}</span>
+              <Icon className="h-5 w-5 shrink-0" />
+              <span className="break-words text-center leading-tight">{t(n.k)}</span>
             </Link>
           );
         })}

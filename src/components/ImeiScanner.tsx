@@ -16,6 +16,8 @@ export function ImeiScanner({ validate }: { validate: (imei: string) => Promise<
   const [signal, setSignal] = useState<null | { ok: boolean; text: string }>(null);
   const [manual, setManual] = useState("");
   const [scanning, setScanning] = useState(false);
+  const [starting, setStarting] = useState(false);
+  const startingRef = useRef(false);
   const scannerRef = useRef<{ stop: () => Promise<void> } | null>(null);
   const busy = useRef(false);
   const lastRef = useRef<{ code: string; at: number }>({ code: "", at: 0 });
@@ -39,11 +41,19 @@ export function ImeiScanner({ validate }: { validate: (imei: string) => Promise<
   }
 
   async function start() {
-    const { Html5Qrcode } = await import("html5-qrcode");
-    const s = new Html5Qrcode(elId);
-    await s.start({ facingMode: "environment" }, { fps: 10, qrbox: { width: 280, height: 120 } }, (txt) => void handle(txt), () => {});
-    scannerRef.current = { stop: () => s.stop() };
-    setScanning(true);
+    if (startingRef.current || scannerRef.current) return;
+    startingRef.current = true;
+    setStarting(true);
+    try {
+      const { Html5Qrcode } = await import("html5-qrcode");
+      const s = new Html5Qrcode(elId);
+      await s.start({ facingMode: "environment" }, { fps: 10, qrbox: (width, height) => ({ width: Math.min(280, Math.floor(width * 0.85)), height: Math.min(120, Math.floor(height * 0.6)) }) }, (txt) => void handle(txt), () => {});
+      scannerRef.current = { stop: () => s.stop() };
+      setScanning(true);
+    } finally {
+      startingRef.current = false;
+      setStarting(false);
+    }
   }
   async function stop() {
     await scannerRef.current?.stop().catch(() => {});
@@ -55,12 +65,12 @@ export function ImeiScanner({ validate }: { validate: (imei: string) => Promise<
   return (
     <div className="space-y-2">
       <div id={elId} className={cn("overflow-hidden rounded-lg", scanning && "border")} />
-      <div className="flex gap-2">
-        <Button type="button" variant={scanning ? "outline" : "default"} onClick={() => (scanning ? stop() : start().catch((e) => setSignal({ ok: false, text: String(e) })))}>
+      <div className="grid gap-2 sm:grid-cols-[auto_minmax(0,1fr)]">
+        <Button type="button" disabled={starting} variant={scanning ? "outline" : "default"} onClick={() => (scanning ? stop() : start().catch((e) => setSignal({ ok: false, text: String(e) })))}>
           {scanning ? t("stopScan") : t("scan")}
         </Button>
         <form
-          className="flex flex-1 gap-2"
+          className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] gap-2"
           onSubmit={(e) => {
             e.preventDefault();
             if (manual.trim()) void handle(manual.trim()).then(() => setManual(""));
@@ -74,7 +84,7 @@ export function ImeiScanner({ validate }: { validate: (imei: string) => Promise<
         <div
           role="status"
           className={cn(
-            "rounded-lg px-4 py-3 text-sm font-semibold transition-colors",
+            "break-words rounded-lg px-4 py-3 text-sm font-semibold transition-colors motion-reduce:animate-none",
             signal.ok ? "bg-success text-success-foreground" : "animate-pulse bg-destructive text-destructive-foreground",
           )}
         >

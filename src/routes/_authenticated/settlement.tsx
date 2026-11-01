@@ -1,3 +1,4 @@
+import { pageHead } from "@/lib/page-head";
 import { createFileRoute } from "@tanstack/react-router";
 import { useState, type ReactNode } from "react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -19,7 +20,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { PageTitle } from "@/components/Stat";
 
 export const Route = createFileRoute("/_authenticated/settlement")({
-  head: () => ({ meta: [{ title: "ফেরত ও জমা — মোবাইল হিসাব" }] }),
+  head: () => pageHead("ফেরত ও জমা", "FIROZA ENTERPRISE returns, damage, deposits and settlement reports."),
   component: Settlement,
 });
 
@@ -61,7 +62,8 @@ function ReportBox({ salesmanId, salesmanName }: { salesmanId: string; salesmanN
   if (!data) return null;
 
   function exportReport() {
-    const d = data!;
+    const d = data;
+    if (!d) return;
     const rows: (string | number)[][] = [
       [t("settlementReport"), salesmanName],
       [],
@@ -78,7 +80,8 @@ function ReportBox({ salesmanId, salesmanName }: { salesmanId: string; salesmanN
   }
 
   function printReport() {
-    const d = data!;
+    const d = data;
+    if (!d) return;
     setPrintDoc(
       <SettlementDoc b={business} appName={t("appName")} salesmanName={salesmanName} products={d.products}
         salesTotal={d.salesTotal} cashInHand={d.cashInHand} deposited={d.deposited}
@@ -114,12 +117,12 @@ function ReturnBox({ salesmanId }: { salesmanId: string }) {
   }
   return (
     <section className="space-y-3 rounded-2xl border-2 border-dashed p-4">
-      <div className="flex items-center justify-between">
+      <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2">
         <h2 className="font-display text-lg font-bold">{t("returnGoods")}</h2>
         <label className="flex items-center gap-2 text-sm"><Switch checked={damaged} onCheckedChange={setDamaged} />{t("markDamaged")}</label>
       </div>
       {summary && summary.handImeis.length > 0 && (
-        <p className="text-xs text-muted-foreground">{t("inHand")} IMEI: {summary.handImeis.map((i) => i.imei).join(", ")}</p>
+        <p className="break-words text-xs text-muted-foreground">{t("inHand")} IMEI: {summary.handImeis.map((i) => i.imei).join(", ")}</p>
       )}
       <CartBuilder mode="return" salesmanId={salesmanId} cart={cart} setCart={setCart} onlyProductIds={held} />
       <Button className="w-full" variant={damaged ? "destructive" : "default"} disabled={!cart.length} onClick={submit}>
@@ -148,8 +151,8 @@ function DepositBox({ salesmanId }: { salesmanId: string }) {
     <form onSubmit={submit} className="space-y-3 rounded-2xl border bg-accent/10 p-4">
       <h2 className="font-display text-lg font-bold">{t("deposit")}</h2>
       <p className="text-sm">{t("cashInHand")}: <b>{money(data?.cashInHand)}</b></p>
-      <div className="flex flex-wrap gap-2">
-        <Input className="w-40" type="number" placeholder={t("amount")} value={amt} onChange={(e) => setAmt(e.target.value)} />
+      <div className="grid gap-2 sm:grid-cols-[10rem_minmax(0,1fr)_auto]">
+        <Input className="w-full" type="number" placeholder={t("amount")} value={amt} onChange={(e) => setAmt(e.target.value)} />
         <Input className="flex-1" placeholder="Note" value={note} onChange={(e) => setNote(e.target.value)} />
         <Button>{t("save")}</Button>
       </div>
@@ -167,9 +170,9 @@ function DepositHistory({ salesmanId, salesmanName }: { salesmanId: string; sale
     <section className="rounded-xl border bg-card p-4">
       <h2 className="mb-2 font-display font-bold">{t("deposited")} · {t("history")}</h2>
       {data.deposits.map((d) => (
-        <div key={d.id} className="flex items-center justify-between gap-2 border-b py-1 text-sm last:border-0">
+        <div key={d.id} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 border-b py-2 text-sm last:border-0 sm:flex">
           <span className="min-w-0 flex-1 truncate">{money(d.amount)} {d.note && <span className="text-muted-foreground">— {d.note}</span>}</span>
-          <span className="shrink-0 text-muted-foreground">{new Date(d.created_at).toLocaleString()}</span>
+          <span className="row-start-2 text-xs text-muted-foreground sm:shrink-0">{new Date(d.created_at).toLocaleString()}</span>
           <Button size="sm" variant="ghost" className="h-7 shrink-0 px-2" title={t("printReceipt")}
             onClick={() => setPrintDoc(
               <MoneyReceiptDoc b={business} appName={t("appName")} receiptId={d.id} date={d.created_at}

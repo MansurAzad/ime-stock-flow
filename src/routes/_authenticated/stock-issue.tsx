@@ -1,3 +1,4 @@
+import { pageHead } from "@/lib/page-head";
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -12,7 +13,7 @@ import { PageTitle } from "@/components/Stat";
 
 export const Route = createFileRoute("/_authenticated/stock-issue")({
   beforeLoad: requireAdmin,
-  head: () => ({ meta: [{ title: "মাল দেওয়া — মোবাইল হিসাব" }] }),
+  head: () => pageHead("মাল দেওয়া", "FIROZA ENTERPRISE stock issue and validated smartphone IMEI transfers."),
   component: StockIssue,
 });
 
