@@ -9,3 +9,4 @@
 - [x] Show 30-day overdue retailers above dashboard KPI cards, respecting existing permissions.
 - [x] Add per-product low-stock limits and red dashboard alerts.
 - [x] Add relevant KPI cards and verify calculations and mobile layouts.
+- [x] Speed pass: local session checks in guards, shared cached "me" query, intent preloading, font preconnect; reverted autoCodeSplitting (hydration break); verified timings and zero page errors.
