@@ -58,18 +58,18 @@ export function isNetworkFailure(error: unknown, offline: boolean): boolean {
 }
 
 /** Run one queued op against the same RPC/insert paths the online forms use. */
-async function runOp(op: QueuedOp): Promise<{ error: { message: string } | null }> {
+async function runOp(op: QueuedOp) {
   switch (op.kind) {
     case "record_sale":
     case "return_stock":
     case "issue_stock":
-      return supabase.rpc(op.kind, op.payload as never) as Promise<{ error: { message: string } | null }>;
+      return await supabase.rpc(op.kind, op.payload as never);
     case "deposit":
-      return supabase.from("deposits").insert(op.payload);
+      return await supabase.from("deposits").insert(op.payload);
     case "retailer_payment":
-      return supabase.from("retailer_payments").insert(op.payload);
+      return await supabase.from("retailer_payments").insert(op.payload);
     case "add_retailer":
-      return supabase.from("retailers").insert(op.payload);
+      return await supabase.from("retailers").insert(op.payload);
   }
 }
 
