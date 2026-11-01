@@ -5,6 +5,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useSalesmen, requireAdmin } from "@/lib/me";
+import { runOrQueue, useOnline } from "@/lib/offline";
 import { useT } from "@/lib/i18n";
 import { CartBuilder, type CartLine } from "@/components/CartBuilder";
 import { Button } from "@/components/ui/button";
@@ -23,15 +24,16 @@ function StockIssue() {
   const { data: salesmen = [] } = useSalesmen();
   const [sid, setSid] = useState("");
   const [cart, setCart] = useState<CartLine[]>([]);
+  const online = useOnline();
 
   async function submit() {
     if (!sid || !cart.length) return;
-    const { error } = await supabase.rpc("issue_stock", {
-      _salesman: sid,
-      _items: cart.map((l) => ({ product_id: l.product_id, qty: l.qty, imeis: l.imeis })),
-    });
-    if (error) { toast.error(error.message); return; }
-    toast.success(t("done"));
+    const result = await runOrQueue(
+      { kind: "issue_stock", payload: { _salesman: sid, _items: cart.map((l) => ({ product_id: l.product_id, qty: l.qty, imeis: l.imeis })) } },
+      !online,
+    );
+    if (result.s === "error") { toast.error(result.error); return; }
+    toast.success(t(result.s === "queued" ? "savedOffline" : "done"));
     setCart([]);
     qc.invalidateQueries();
   }

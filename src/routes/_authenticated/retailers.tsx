@@ -10,6 +10,7 @@ import { useT } from "@/lib/i18n";
 import { money } from "@/lib/imei";
 import { exportCsv } from "@/lib/export";
 import { useBusiness } from "@/lib/business";
+import { runOrQueue, useOnline } from "@/lib/offline";
 import { fetchSaleItems } from "@/lib/receipt";
 import { LedgerDoc, MoneyReceiptDoc, PrintSheet, SaleReceiptDoc } from "@/components/PrintDocs";
 import { Button } from "@/components/ui/button";
@@ -66,8 +67,9 @@ function Retailers() {
   async function add(e: React.FormEvent) {
     e.preventDefault();
     if (!me) return;
-    const { error } = await supabase.from("retailers").insert({ ...f, salesman_id: me.id });
-    if (error) { toast.error(error.message); return; }
+    const result = await runOrQueue({ kind: "add_retailer", payload: { ...f, salesman_id: me.id } }, !online);
+    if (result.s === "error") { toast.error(result.error); return; }
+    if (result.s === "queued") toast.success(t("savedOffline"));
     setF({ name: "", phone: "", address: "" });
     qc.invalidateQueries({ queryKey: ["retailers"] });
   }
@@ -191,13 +193,14 @@ function PaymentForm({ retailerId, max }: { retailerId: string; max: number }) {
   const { t } = useT();
   const qc = useQueryClient();
   const [amt, setAmt] = useState("");
+  const online = useOnline();
   async function pay(e: React.FormEvent) {
     e.preventDefault();
     const n = Number(amt);
     if (n <= 0 || n > max) { toast.error(`${t("due")}: ${money(max)}`); return; }
-    const { error } = await supabase.from("retailer_payments").insert({ retailer_id: retailerId, amount: n });
-    if (error) { toast.error(error.message); return; }
-    setAmt(""); toast.success(t("done"));
+    const result = await runOrQueue({ kind: "retailer_payment", payload: { retailer_id: retailerId, amount: n } }, !online);
+    if (result.s === "error") { toast.error(result.error); return; }
+    setAmt(""); toast.success(t(result.s === "queued" ? "savedOffline" : "done"));
     qc.invalidateQueries();
   }
   return (
