@@ -9,6 +9,7 @@ import { useMe, useRetailers, useSalesmanSummary } from "@/lib/me";
 import { useT } from "@/lib/i18n";
 import { money } from "@/lib/imei";
 import { useBusiness } from "@/lib/business";
+import { runOrQueue, useOnline } from "@/lib/offline";
 import { fetchSaleItems } from "@/lib/receipt";
 import { PrintSheet, SaleReceiptDoc } from "@/components/PrintDocs";
 import { CartBuilder, type CartLine } from "@/components/CartBuilder";
@@ -30,6 +31,7 @@ function Sales() {
   const { data: retailers = [] } = useRetailers();
   const { data: summary } = useSalesmanSummary(me?.id);
   const [business] = useBusiness();
+  const online = useOnline();
   const [rid, setRid] = useState("");
   const [paid, setPaid] = useState("");
   const [cart, setCart] = useState<CartLine[]>([]);
@@ -39,12 +41,19 @@ function Sales() {
   const held = summary?.products.filter((p) => p.hand > 0).map((p) => p.product_id) ?? [];
 
   async function submit() {
-    const { data, error } = await supabase.rpc("record_sale", {
-      _retailer: rid,
-      _items: cart.map((l) => ({ product_id: l.product_id, qty: l.qty, unit_price: l.unit_price, imeis: l.imeis })),
-      _paid: Number(paid || 0),
-    });
-    if (error) { toast.error(error.message); return; }
+    const result = await runOrQueue(
+      {
+        kind: "record_sale",
+        payload: {
+          _retailer: rid,
+          _items: cart.map((l) => ({ product_id: l.product_id, qty: l.qty, unit_price: l.unit_price, imeis: l.imeis })),
+          _paid: Number(paid || 0),
+        },
+      },
+      !online,
+    );
+    if (typeof result === "object") { toast.error(result.error); return; }
+    if (result === "queued") { toast.success(t("savedOffline")); setCart([]); setPaid(""); return; }
     toast.success(t("done"));
     setLastSale({ id: data as string, retailerId: rid, total, paid: Number(paid || 0), date: new Date().toISOString() });
     setCart([]); setPaid("");
