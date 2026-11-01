@@ -30,6 +30,7 @@ function Retailers() {
   const { t } = useT();
   const qc = useQueryClient();
   const { data: me } = useMe();
+  const online = useOnline();
   const { data: retailers = [] } = useRetailers();
   const [business] = useBusiness();
   const [f, setF] = useState({ name: "", phone: "", address: "" });

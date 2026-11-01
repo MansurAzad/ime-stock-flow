@@ -4,7 +4,6 @@ import { useState, type ReactNode } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Printer } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 import { useMe, useRetailers, useSalesmanSummary } from "@/lib/me";
 import { useT } from "@/lib/i18n";
 import { money } from "@/lib/imei";
