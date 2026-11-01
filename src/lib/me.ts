@@ -1,29 +1,38 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, type QueryClient } from "@tanstack/react-query";
 import { redirect } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 
-/** Route guard: only admins may proceed; salesmen are sent to their dashboard. */
-export async function requireAdmin() {
-  const { data: u } = await supabase.auth.getUser();
-  if (!u.user) throw redirect({ to: "/auth" });
-  const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", u.user.id);
-  if (!roles?.some((r) => r.role === "admin")) throw redirect({ to: "/dashboard" });
+export type Me = { id: string; email: string | undefined; isAdmin: boolean; profile: { full_name: string } | null };
+
+/**
+ * Current user + role, cached so guards and pages share one fetch.
+ * Session is read locally (getSession) — real access control stays in RLS.
+ */
+export const meQueryOptions = {
+  queryKey: ["me"],
+  staleTime: 60_000,
+  queryFn: async (): Promise<Me | null> => {
+    const { data: s } = await supabase.auth.getSession();
+    const user = s.session?.user;
+    if (!user) return null;
+    const [{ data: roles }, { data: profile }] = await Promise.all([
+      supabase.from("user_roles").select("role").eq("user_id", user.id),
+      supabase.from("profiles").select("full_name").eq("id", user.id).maybeSingle(),
+    ]);
+    const isAdmin = !!roles?.some((r) => r.role === "admin");
+    return { id: user.id, email: user.email, isAdmin, profile };
+  },
+};
+
+/** Route guard: only admins may proceed; salesmen are sent to their dashboard. Reuses the cached "me" query. */
+export async function requireAdmin({ context }: { context: { queryClient: QueryClient } }) {
+  const me = await context.queryClient.ensureQueryData(meQueryOptions);
+  if (!me) throw redirect({ to: "/auth" });
+  if (!me.isAdmin) throw redirect({ to: "/dashboard" });
 }
 
 export function useMe() {
-  return useQuery({
-    queryKey: ["me"],
-    queryFn: async () => {
-      const { data: u } = await supabase.auth.getUser();
-      if (!u.user) return null;
-      const [{ data: roles }, { data: profile }] = await Promise.all([
-        supabase.from("user_roles").select("role").eq("user_id", u.user.id),
-        supabase.from("profiles").select("*").eq("id", u.user.id).maybeSingle(),
-      ]);
-      const isAdmin = !!roles?.some((r) => r.role === "admin");
-      return { id: u.user.id, email: u.user.email, isAdmin, profile };
-    },
-  });
+  return useQuery(meQueryOptions);
 }
 
 export function useSalesmen() {

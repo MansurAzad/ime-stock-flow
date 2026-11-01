@@ -14,6 +14,8 @@ export const getRouter = () => {
     routeTree,
     context: { queryClient },
     scrollRestoration: true,
+    // Preload a route as soon as a nav link is hovered/touched so navigation feels instant.
+    defaultPreload: "intent",
     defaultPreloadStaleTime: 0,
   });
 

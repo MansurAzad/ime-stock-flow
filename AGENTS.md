@@ -23,3 +23,5 @@
 - Dashboard insights use a security-invoker RPC; stock-house alerts are owner-only and retailer financial insights retain caller RLS.
 - Age unallocated retailer payments against initial invoice balances oldest-first, ordered by sale timestamp and ID, without storing running balances.
 - Daily and monthly reporting boundaries use the Asia/Dhaka timezone; per-product stock thresholds default to disabled until configured.
+- Route guards and useMe read the session locally (getSession) and share the cached "me" query via meQueryOptions; RLS stays the enforcement layer, guards are UX-only.
+- Do not enable tanstackStart autoCodeSplitting: it breaks hydration (MatchView "routeId" undefined) in this template.
