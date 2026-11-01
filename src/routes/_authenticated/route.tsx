@@ -11,7 +11,12 @@ import { useOnline, usePendingSyncCount } from "@/lib/offline";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import logoAsset from "@/assets/firoza-logo.png.asset.json";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Menu } from "lucide-react";
+
+// Logo is served from /public so it works on every host (Lovable + Vercel),
+// not only on Lovable's asset CDN.
+const LOGO_URL = "/firoza-logo.png";
 
 const navIcon: Partial<Record<Key, LucideIcon>> = {
   dashboard: LayoutDashboard,
