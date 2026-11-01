@@ -97,3 +97,28 @@ function Layout() {
     </div>
   );
 }
+
+function BusinessSettings() {
+  const { t } = useT();
+  const [open, setOpen] = useState(false);
+  const [business, saveBusiness] = useBusiness();
+  const [f, setF] = useState(business);
+  return (
+    <>
+      <Button size="sm" variant="secondary" title={t("businessInfo")} onClick={() => { setF(business); setOpen(true); }}>
+        <Settings2 className="h-4 w-4" />
+      </Button>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>{t("businessInfo")}</DialogTitle></DialogHeader>
+          <div className="space-y-3">
+            <div className="space-y-1"><Label>{t("name")}</Label><Input value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} /></div>
+            <div className="space-y-1"><Label>{t("address")}</Label><Input value={f.address} onChange={(e) => setF({ ...f, address: e.target.value })} /></div>
+            <div className="space-y-1"><Label>{t("phone")}</Label><Input value={f.phone} onChange={(e) => setF({ ...f, phone: e.target.value })} /></div>
+            <Button className="w-full" onClick={() => { saveBusiness(f); setOpen(true); setOpen(false); }}>{t("save")}</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}
