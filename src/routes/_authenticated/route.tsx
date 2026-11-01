@@ -104,6 +104,23 @@ function Layout() {
   );
 }
 
+/** Shows connection status and how many offline entries still need syncing. */
+function SyncBadge() {
+  const { t } = useT();
+  const online = useOnline();
+  const pending = usePendingSyncCount();
+  if (online && pending === 0) return null;
+  return (
+    <span
+      className={`rounded-full px-2 py-1 text-[10px] font-semibold sm:text-xs ${
+        online ? "bg-warning/20 text-foreground" : "bg-destructive/20 text-primary-foreground"
+      }`}
+    >
+      {online ? `${pending} ${t("pendingSync")}` : t("offline") + (pending ? ` · ${pending}` : "")}
+    </span>
+  );
+}
+
 function BusinessSettings() {
   const { t } = useT();
   const [open, setOpen] = useState(false);
