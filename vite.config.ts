@@ -22,20 +22,9 @@ export default defineConfig({
         injectRegister: null,
         devOptions: { enabled: false },
         filename: "sw.js",
-        manifest: {
-          name: "প্রোডাক্ট ডিস্ট্রিবিউশন ম্যানেজমেন্ট — FIROZA ENTERPRISE",
-          short_name: "FIROZA ENT.",
-          description: "FIROZA ENTERPRISE — KONABARI, GAZIPUR. Product distribution and accounts.",
-          theme_color: "#1f6f78",
-          background_color: "#f8f6f0",
-          display: "standalone",
-          start_url: "/",
-          icons: [
-            { src: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
-            { src: "/icons/icon-512.png", sizes: "512x512", type: "image/png" },
-            { src: "/icons/icon-512.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
-          ],
-        },
+        // Manifest is a static public/manifest.webmanifest so it is served
+        // identically in dev, preview and production.
+        manifest: false,
         workbox: {
           // Only same-origin hashed build assets are precached (CacheFirst).
           globPatterns: ["**/*.{js,css,svg,png,ico,woff2}"],

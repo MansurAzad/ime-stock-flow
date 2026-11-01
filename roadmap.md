@@ -10,3 +10,6 @@
 - [x] Add per-product low-stock limits and red dashboard alerts.
 - [x] Add relevant KPI cards and verify calculations and mobile layouts.
 - [x] Speed pass: local session checks in guards, shared cached "me" query, intent preloading, font preconnect; reverted autoCodeSplitting (hydration break); verified timings and zero page errors.
+- [x] PWA install support: static manifest, app icons, favicon, theme-color, guarded SW registration (never in preview/dev).
+- [x] Offline support: generated service worker (NetworkFirst pages), persisted query cache (excludes security queries), first-open internet validation gate.
+- [x] Offline entry queue for sale/return/issue/deposit/payment/retailer-add with replay on reconnect, offline IMEI fallback, header sync badge; verified end-to-end in browser (queued deposit synced on reconnect).
