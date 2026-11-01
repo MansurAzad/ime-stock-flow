@@ -1,9 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { useMe, useSalesmanSummary } from "@/lib/me";
+import { useMe, useRetailers, useSalesmanSummary } from "@/lib/me";
 import { useT } from "@/lib/i18n";
 import { money } from "@/lib/imei";
 import { CartBuilder, type CartLine } from "@/components/CartBuilder";
@@ -17,13 +17,6 @@ export const Route = createFileRoute("/_authenticated/sales")({
   head: () => ({ meta: [{ title: "বিক্রি — মোবাইল হিসাব" }] }),
   component: Sales,
 });
-
-export function useRetailers() {
-  return useQuery({
-    queryKey: ["retailers"],
-    queryFn: async () => (await supabase.from("retailers").select("*").order("name")).data ?? [],
-  });
-}
 
 function Sales() {
   const { t } = useT();

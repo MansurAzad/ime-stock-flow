@@ -91,3 +91,10 @@ export function useSalesmanSummary(salesmanId: string | undefined) {
     },
   });
 }
+
+export function useRetailers() {
+  return useQuery({
+    queryKey: ["retailers"],
+    queryFn: async () => (await supabase.from("retailers").select("*").order("name")).data ?? [],
+  });
+}

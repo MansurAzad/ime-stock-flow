@@ -3,13 +3,12 @@ import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { useMe } from "@/lib/me";
+import { useMe, useRetailers } from "@/lib/me";
 import { useT } from "@/lib/i18n";
 import { money } from "@/lib/imei";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PageTitle } from "@/components/Stat";
-import { useRetailers } from "./sales";
 
 export const Route = createFileRoute("/_authenticated/retailers")({
   head: () => ({ meta: [{ title: "রিটেইলার লেজার — মোবাইল হিসাব" }] }),
