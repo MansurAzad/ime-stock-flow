@@ -10,6 +10,7 @@ import { useT } from "@/lib/i18n";
 import { money } from "@/lib/imei";
 import { exportCsv } from "@/lib/export";
 import { useBusiness } from "@/lib/business";
+import { runOrQueue, useOnline } from "@/lib/offline";
 import { MoneyReceiptDoc, PrintSheet, SettlementDoc } from "@/components/PrintDocs";
 import { CartBuilder, type CartLine } from "@/components/CartBuilder";
 import { SalesmanSummary } from "@/components/SalesmanSummary";
@@ -104,14 +105,15 @@ function ReturnBox({ salesmanId }: { salesmanId: string }) {
   const { data: summary } = useSalesmanSummary(salesmanId);
   const [cart, setCart] = useState<CartLine[]>([]);
   const [damaged, setDamaged] = useState(false);
+  const online = useOnline();
   const held = summary?.products.filter((p) => p.hand > 0).map((p) => p.product_id) ?? [];
   async function submit() {
-    const { error } = await supabase.rpc("return_stock", {
-      _salesman: salesmanId,
-      _items: cart.map((l) => ({ product_id: l.product_id, qty: l.qty, imeis: l.imeis, damaged })),
-    });
-    if (error) { navigator.vibrate?.(300); { toast.error(error.message); return; } }
-    toast.success(t("done"));
+    const result = await runOrQueue(
+      { kind: "return_stock", payload: { _salesman: salesmanId, _items: cart.map((l) => ({ product_id: l.product_id, qty: l.qty, imeis: l.imeis, damaged })) } },
+      !online,
+    );
+    if (result.s === "error") { navigator.vibrate?.(300); toast.error(result.error); return; }
+    toast.success(t(result.s === "queued" ? "savedOffline" : "done"));
     setCart([]);
     qc.invalidateQueries();
   }
@@ -138,13 +140,14 @@ function DepositBox({ salesmanId }: { salesmanId: string }) {
   const { data } = useSalesmanSummary(salesmanId);
   const [amt, setAmt] = useState("");
   const [note, setNote] = useState("");
+  const online = useOnline();
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     const n = Number(amt);
     if (n <= 0) return;
-    const { error } = await supabase.from("deposits").insert({ salesman_id: salesmanId, amount: n, note: note || null });
-    if (error) { toast.error(error.message); return; }
-    setAmt(""); setNote(""); toast.success(t("done"));
+    const result = await runOrQueue({ kind: "deposit", payload: { salesman_id: salesmanId, amount: n, note: note || null } }, !online);
+    if (result.s === "error") { toast.error(result.error); return; }
+    setAmt(""); setNote(""); toast.success(t(result.s === "queued" ? "savedOffline" : "done"));
     qc.invalidateQueries();
   }
   return (
