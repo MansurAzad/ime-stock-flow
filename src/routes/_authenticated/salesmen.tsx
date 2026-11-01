@@ -1,3 +1,4 @@
+import { pageHead } from "@/lib/page-head";
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -15,7 +16,7 @@ import { SalesmanSummary } from "@/components/SalesmanSummary";
 
 export const Route = createFileRoute("/_authenticated/salesmen")({
   beforeLoad: requireAdmin,
-  head: () => ({ meta: [{ title: "সেলসম্যান — মোবাইল হিসাব" }] }),
+  head: () => pageHead("সেলসম্যান", "FIROZA ENTERPRISE salesman accounts and individual stock balances."),
   component: Salesmen,
 });
 

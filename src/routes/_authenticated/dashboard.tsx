@@ -1,3 +1,4 @@
+import { pageHead } from "@/lib/page-head";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,7 +12,7 @@ import { FileSpreadsheet } from "lucide-react";
 import { exportCsv } from "@/lib/export";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
-  head: () => ({ meta: [{ title: "ড্যাশবোর্ড — মোবাইল হিসাব" }] }),
+  head: () => pageHead("ড্যাশবোর্ড", "FIROZA ENTERPRISE stock, sales, deposits and retailer balances."),
   component: Dashboard,
 });
 
@@ -37,30 +38,9 @@ function AdminDash() {
   const { data: agg } = useQuery({
     queryKey: ["admin-agg"],
     queryFn: async () => {
-      const [imeis, sales, pays, deps] = await Promise.all([
-        supabase.from("imei_units").select("status"),
-        supabase.from("sales").select("total, paid, salesman_id"),
-        supabase.from("retailer_payments").select("amount, salesman_id"),
-        supabase.from("deposits").select("amount, salesman_id"),
-      ]);
-      const sum = (a: { [k: string]: unknown }[] | null, k: string) => (a ?? []).reduce((s, r) => s + Number(r[k]), 0);
-      const by = (rows: { salesman_id: string; [k: string]: unknown }[] | null, k: string) => {
-        const m: Record<string, number> = {};
-        for (const r of rows ?? []) m[r.salesman_id] = (m[r.salesman_id] ?? 0) + Number(r[k]);
-        return m;
-      };
-      return {
-        inStock: (imeis.data ?? []).filter((i) => i.status === "in_stock").length,
-        withSales: (imeis.data ?? []).filter((i) => i.status === "with_salesman").length,
-        damaged: (imeis.data ?? []).filter((i) => i.status === "damaged").length,
-        salesTotal: sum(sales.data, "total"),
-        due: sum(sales.data, "total") - sum(sales.data, "paid") - sum(pays.data, "amount"),
-        deposited: sum(deps.data, "amount"),
-        salesBy: by(sales.data, "total"),
-        paidBy: by(sales.data, "paid"),
-        collectedBy: by(pays.data, "amount"),
-        depBy: by(deps.data, "amount"),
-      };
+      const { data, error } = await supabase.rpc("distribution_dashboard");
+      if (error) throw error;
+      return data as unknown as { inStock: number; withSales: number; damaged: number; salesTotal: number; due: number; deposited: number; salesBy: Record<string, number>; paidBy: Record<string, number>; collectedBy: Record<string, number>; depBy: Record<string, number> };
     },
   });
   const buttonStock = products.filter((p) => !p.is_smartphone).reduce((a, p) => a + p.stock_qty, 0);
@@ -75,7 +55,7 @@ function AdminDash() {
   }
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-2">
+      <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 sm:flex sm:justify-between">
         <PageTitle>{t("dashboard")}</PageTitle>
         <Button size="sm" variant="secondary" onClick={exportSummary} disabled={!agg}>
           <FileSpreadsheet className="mr-1 h-4 w-4" />{t("export")}

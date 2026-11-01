@@ -1,3 +1,4 @@
+import { pageHead } from "@/lib/page-head";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -9,14 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useT } from "@/lib/i18n";
 
 export const Route = createFileRoute("/auth")({
-  head: () => ({
-    meta: [
-      { title: "লগইন — মোবাইল ডিস্ট্রিবিউশন হিসাব" },
-      { name: "description", content: "Sign in to manage dealer stock and salesman accounts." },
-      { property: "og:title", content: "Sign in — Mobile Distribution Hisab" },
-      { property: "og:description", content: "Sign in to manage dealer stock and salesman accounts." },
-    ],
-  }),
+  head: () => pageHead("লগইন", "Sign in to FIROZA ENTERPRISE Product Distribution Management. KONABARI, GAZIPUR. MOBILE- 01817122232."),
   component: AuthPage,
 });
 

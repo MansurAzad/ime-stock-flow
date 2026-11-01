@@ -1,5 +1,6 @@
+import { pageHead } from "@/lib/page-head";
 import { createFileRoute } from "@tanstack/react-router";
-import { useState, type ReactNode } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { FileSpreadsheet, Printer } from "lucide-react";
@@ -20,7 +21,7 @@ type PayRow = { id: string; created_at: string; amount: number; note: string | n
 type RetailerRow = { id: string; name: string; phone: string | null; address: string | null };
 
 export const Route = createFileRoute("/_authenticated/retailers")({
-  head: () => ({ meta: [{ title: "রিটেইলার লেজার — মোবাইল হিসাব" }] }),
+  head: () => pageHead("রিটেইলার লেজার", "FIROZA ENTERPRISE retailer ledgers, collections and outstanding balances."),
   component: Retailers,
 });
 
@@ -37,23 +38,35 @@ function Retailers() {
     queryKey: ["ledger"],
     queryFn: async () => {
       const [s, p] = await Promise.all([
-        supabase.from("sales").select("*").order("created_at", { ascending: false }),
-        supabase.from("retailer_payments").select("*").order("created_at", { ascending: false }),
+        supabase.from("sales").select("id,created_at,total,paid,retailer_id").order("created_at", { ascending: false }),
+        supabase.from("retailer_payments").select("id,created_at,amount,note,retailer_id").order("created_at", { ascending: false }),
       ]);
+      if (s.error) throw s.error;
+      if (p.error) throw p.error;
       return { sales: (s.data ?? []) as SaleRow[], pays: (p.data ?? []) as PayRow[] };
     },
   });
 
   const appName = t("appName");
-  const salesOf = (r: RetailerRow) => ledger?.sales.filter((s) => s.retailer_id === r.id) ?? [];
-  const paysOf = (r: RetailerRow) => ledger?.pays.filter((p) => p.retailer_id === r.id) ?? [];
-  const totalOf = (r: RetailerRow) => salesOf(r).reduce((a, s) => a + Number(s.total), 0);
-  const paidOf = (r: RetailerRow) =>
-    salesOf(r).reduce((a, s) => a + Number(s.paid), 0) + paysOf(r).reduce((a, p) => a + Number(p.amount), 0);
+  const grouped = useMemo(() => {
+    const sales = new Map<string, SaleRow[]>();
+    const pays = new Map<string, PayRow[]>();
+    for (const row of ledger?.sales ?? []) { const list = sales.get(row.retailer_id) ?? []; list.push(row); sales.set(row.retailer_id, list); }
+    for (const row of ledger?.pays ?? []) { const list = pays.get(row.retailer_id) ?? []; list.push(row); pays.set(row.retailer_id, list); }
+    const balances = new Map<string, { total: number; paid: number }>();
+    for (const [id, list] of sales) balances.set(id, { total: list.reduce((n,r) => n + Number(r.total),0), paid: list.reduce((n,r) => n + Number(r.paid),0) });
+    for (const [id, list] of pays) { const b = balances.get(id) ?? { total: 0, paid: 0 }; b.paid += list.reduce((n,r) => n + Number(r.amount),0); balances.set(id,b); }
+    return { sales, pays, balances };
+  }, [ledger]);
+  const salesOf = (r: RetailerRow) => grouped.sales.get(r.id) ?? [];
+  const paysOf = (r: RetailerRow) => grouped.pays.get(r.id) ?? [];
+  const totalOf = (r: RetailerRow) => grouped.balances.get(r.id)?.total ?? 0;
+  const paidOf = (r: RetailerRow) => grouped.balances.get(r.id)?.paid ?? 0;
 
   async function add(e: React.FormEvent) {
     e.preventDefault();
-    const { error } = await supabase.from("retailers").insert({ ...f, salesman_id: me!.id });
+    if (!me) return;
+    const { error } = await supabase.from("retailers").insert({ ...f, salesman_id: me.id });
     if (error) { toast.error(error.message); return; }
     setF({ name: "", phone: "", address: "" });
     qc.invalidateQueries({ queryKey: ["retailers"] });
@@ -188,7 +201,7 @@ function PaymentForm({ retailerId, max }: { retailerId: string; max: number }) {
     qc.invalidateQueries();
   }
   return (
-    <form onSubmit={pay} className="flex gap-2">
+    <form onSubmit={pay} className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto]">
       <Input type="number" placeholder={t("amount")} value={amt} onChange={(e) => setAmt(e.target.value)} />
       <Button>{t("collectPayment")}</Button>
     </form>
