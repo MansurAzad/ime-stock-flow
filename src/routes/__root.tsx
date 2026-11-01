@@ -8,10 +8,14 @@ import {
   Scripts,
   type ErrorComponentProps,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
-import { Toaster } from "@/components/ui/sonner";
-import { LangProvider } from "@/lib/i18n";
+import { useEffect, useState, type ReactNode } from "react";
+import { Toaster, toast } from "sonner";
+import { LangProvider, useT } from "@/lib/i18n";
 import { supabase } from "@/integrations/supabase/client";
+import { persistQueryClient } from "@tanstack/react-query-persist-client";
+import { createAppPersister, hasCachedData, shouldPersistQuery, CACHE_BUSTER } from "@/lib/query-persist";
+import { registerAppSW } from "@/lib/pwa-register";
+import { replayQueue, useOnline } from "@/lib/offline";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -91,7 +95,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         rel: "stylesheet",
         href: appCss,
       },
-      { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+      { rel: "icon", href: "/favicon.png", type: "image/png" },
+      { rel: "manifest", href: "/manifest.webmanifest" },
+      { rel: "apple-touch-icon", href: "/icons/apple-touch-icon.png" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" },
