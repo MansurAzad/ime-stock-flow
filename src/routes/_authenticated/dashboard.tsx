@@ -6,6 +6,9 @@ import { useT } from "@/lib/i18n";
 import { money } from "@/lib/imei";
 import { PageTitle, Stat } from "@/components/Stat";
 import { SalesmanSummary } from "@/components/SalesmanSummary";
+import { Button } from "@/components/ui/button";
+import { FileSpreadsheet } from "lucide-react";
+import { exportCsv } from "@/lib/export";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({ meta: [{ title: "ড্যাশবোর্ড — মোবাইল হিসাব" }] }),
@@ -61,9 +64,23 @@ function AdminDash() {
     },
   });
   const buttonStock = products.filter((p) => !p.is_smartphone).reduce((a, p) => a + p.stock_qty, 0);
+  function exportSummary() {
+    const rows: (string | number)[][] = [[t("salesmen"), t("sales"), t("deposited"), t("cashInHand")]];
+    for (const s of salesmen) {
+      const cash = (agg?.paidBy[s.id] ?? 0) + (agg?.collectedBy[s.id] ?? 0) - (agg?.depBy[s.id] ?? 0);
+      rows.push([s.full_name, Math.round(agg?.salesBy[s.id] ?? 0), Math.round(agg?.depBy[s.id] ?? 0), Math.round(cash)]);
+    }
+    rows.push([], [t("sales"), Math.round(agg?.salesTotal ?? 0)], [t("deposited"), Math.round(agg?.deposited ?? 0)], [t("retailerDue"), Math.round(agg?.due ?? 0)]);
+    exportCsv("dashboard-summary.csv", rows, t("dashboard"));
+  }
   return (
     <div className="space-y-6">
-      <PageTitle>{t("dashboard")}</PageTitle>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <PageTitle>{t("dashboard")}</PageTitle>
+        <Button size="sm" variant="secondary" onClick={exportSummary} disabled={!agg}>
+          <FileSpreadsheet className="mr-1 h-4 w-4" />{t("export")}
+        </Button>
+      </div>
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
         <Stat label={`${t("stock")} — ${t("smartphone")}`} value={String(agg?.inStock ?? 0)} />
         <Stat label={`${t("stock")} — ${t("buttonPhone")}`} value={String(buttonStock)} />

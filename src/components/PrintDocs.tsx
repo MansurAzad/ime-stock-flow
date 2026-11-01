@@ -163,6 +163,31 @@ export function LedgerDoc({
   );
 }
 
+/** Generic printable table report (stock lists, summaries). */
+export function TableDoc({
+  b, appName, title, head, rows,
+}: {
+  b: Business; appName: string; title: string; head: string[]; rows: (string | number)[][];
+}) {
+  const { t } = useT();
+  return (
+    <div>
+      <Letterhead b={b} title={title} fallbackName={appName} />
+      <div style={{ fontSize: 12, marginBottom: 8, textAlign: "right" }}>{t("date")}: {new Date().toLocaleDateString("bn-BD", { dateStyle: "medium" })}</div>
+      <table style={{ width: "100%", borderCollapse: "collapse" }}>
+        <thead>
+          <tr>{head.map((h, i) => <th key={i} style={i === 0 ? th : thR}>{h}</th>)}</tr>
+        </thead>
+        <tbody>
+          {rows.map((r, i) => (
+            <tr key={i}>{r.map((c, j) => <td key={j} style={j === 0 ? cell : tdR}>{c}</td>)}</tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
 export type SettlementProduct = { name: string; issued: number; sold: number; returned: number; damaged: number; hand: number; value: number };
 
 /** Trip settlement report: goods movement + money account for one salesman. */
