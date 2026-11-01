@@ -3,7 +3,8 @@ import { createPortal } from "react-dom";
 import { useT } from "@/lib/i18n";
 import { money } from "@/lib/imei";
 import type { Business } from "@/lib/business";
-import logoAsset from "@/assets/firoza-logo.png.asset.json";
+// Logo is served from /public so printed letterheads work on every host.
+const LOGO_URL = "/firoza-logo.png";
 
 /** Mounts a printable sheet into <body> and opens the print dialog (Save as PDF). */
 export function PrintSheet({ children, onDone }: { children: ReactNode; onDone: () => void }) {

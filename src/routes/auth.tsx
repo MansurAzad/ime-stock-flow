@@ -8,7 +8,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useT } from "@/lib/i18n";
-import logoAsset from "@/assets/firoza-logo.png.asset.json";
+// Logo is served from /public so it works on every host (Lovable + Vercel),
+// not only on Lovable's asset CDN.
+const LOGO_URL = "/firoza-logo.png";
 
 export const Route = createFileRoute("/auth")({
   head: () => pageHead("লগইন", "Sign in to FIROZA ENTERPRISE Product Distribution Management. KONABARI, GAZIPUR. MOBILE- 01817122232."),
