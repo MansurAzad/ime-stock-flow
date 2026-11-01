@@ -30,7 +30,7 @@ const fmtDate = (iso: string) => new Date(iso).toLocaleString("bn-BD", { dateSty
 function Letterhead({ b, title, fallbackName }: { b: Business; title: string; fallbackName: string }) {
   return (
     <div style={{ textAlign: "center", borderBottom: "3px double #0f766e", paddingBottom: 10, marginBottom: 12 }}>
-      <img src={logoAsset.url} alt={b.name || fallbackName} style={{ height: 64, margin: "0 auto 6px", display: "block" }} />
+      <img src={LOGO_URL} alt={b.name || fallbackName} style={{ height: 64, margin: "0 auto 6px", display: "block" }} />
       <div style={{ fontSize: 24, fontWeight: 800, color: "#0f766e" }}>{b.name || fallbackName}</div>
       {(b.address || b.phone) && (
         <div style={{ fontSize: 12, color: "#334155" }}>{[b.address, b.phone].filter(Boolean).join(" · ")}</div>

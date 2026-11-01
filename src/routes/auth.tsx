@@ -55,7 +55,7 @@ function AuthPage() {
       <Card className="w-full max-w-md rounded-lg border-t-4 border-t-primary shadow-sm">
         <CardHeader>
           <div className="mb-3 flex w-full justify-center">
-            <img src={logoAsset.url} alt={t("companyName")} className="mx-auto h-28 w-28 rounded-lg object-contain sm:h-32 sm:w-32" />
+            <img src={LOGO_URL} alt={t("companyName")} className="mx-auto h-28 w-28 rounded-lg object-contain sm:h-32 sm:w-32" />
           </div>
           <div className="relative mb-1">
             <Button size="sm" variant="ghost" className="absolute right-0 top-0" onClick={() => setLang(lang === "bn" ? "en" : "bn")}>{lang === "bn" ? "EN" : "বাং"}</Button>

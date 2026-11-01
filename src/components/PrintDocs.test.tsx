@@ -21,6 +21,6 @@ describe("print letterhead logo", () => {
         />
       </LangProvider>,
     );
-    expect(html).toContain(`src="${logoAsset.url}"`);
+    expect(html).toContain(`src="${LOGO_URL}"`);
   });
 });
