@@ -13,6 +13,8 @@ const dict = {
   retailers: ["দোকান / রিটেইলার", "Retailers"],
   settlement: ["ফেরত ও জমা", "Return & Deposit"],
   signOut: ["লগ আউট", "Sign out"],
+  menu: ["মেনু", "Menu"],
+  more: ["আরও", "More"],
   signIn: ["লগইন", "Sign in"],
   signUp: ["নতুন অ্যাকাউন্ট", "Create account"],
   email: ["ইমেইল", "Email"],

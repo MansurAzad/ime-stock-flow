@@ -8,7 +8,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useT } from "@/lib/i18n";
-import logoAsset from "@/assets/firoza-logo.png.asset.json";
+// Logo is served from /public so it works on every host (Lovable + Vercel),
+// not only on Lovable's asset CDN.
+const LOGO_URL = "/firoza-logo.png";
 
 export const Route = createFileRoute("/auth")({
   head: () => pageHead("লগইন", "Sign in to FIROZA ENTERPRISE Product Distribution Management. KONABARI, GAZIPUR. MOBILE- 01817122232."),
@@ -53,7 +55,7 @@ function AuthPage() {
       <Card className="w-full max-w-md rounded-lg border-t-4 border-t-primary shadow-sm">
         <CardHeader>
           <div className="mb-3 flex w-full justify-center">
-            <img src={logoAsset.url} alt={t("companyName")} className="mx-auto h-28 w-28 rounded-lg object-contain sm:h-32 sm:w-32" />
+            <img src={LOGO_URL} alt={t("companyName")} className="mx-auto h-28 w-28 rounded-lg object-contain sm:h-32 sm:w-32" />
           </div>
           <div className="relative mb-1">
             <Button size="sm" variant="ghost" className="absolute right-0 top-0" onClick={() => setLang(lang === "bn" ? "en" : "bn")}>{lang === "bn" ? "EN" : "বাং"}</Button>

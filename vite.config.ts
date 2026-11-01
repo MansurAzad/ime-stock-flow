@@ -9,7 +9,7 @@ import { VitePWA } from "vite-plugin-pwa";
 
 // On Vercel (VERCEL env is set during its builds) emit Vercel's Build Output API;
 // everywhere else keep the default Cloudflare target used by Lovable publishing.
-const onVercel = !!process.env.VERCEL;
+const onVercel = !!process.env["VERCEL"];
 
 export default defineConfig({
   ...(onVercel ? { nitro: { preset: "vercel" } } : {}),

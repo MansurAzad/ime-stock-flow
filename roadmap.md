@@ -13,3 +13,5 @@
 - [x] PWA install support: static manifest, app icons, favicon, theme-color, guarded SW registration (never in preview/dev).
 - [x] Offline support: generated service worker (NetworkFirst pages), persisted query cache (excludes security queries), first-open internet validation gate.
 - [x] Offline entry queue for sale/return/issue/deposit/payment/retailer-add with replay on reconnect, offline IMEI fallback, header sync badge; verified end-to-end in browser (queued deposit synced on reconnect).
+- [x] Serve logo from public/firoza-logo.png so it renders on Vercel deploys (CDN pointer URL only works on Lovable); verified in header, auth page and print letterhead test.
+- [x] Mobile nav: 4-item bottom bar (3 pages + More) with auto-hiding drawer listing all pages; verified drawer opens, navigates and closes itself.

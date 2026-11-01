@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { LangProvider } from "@/lib/i18n";
 import { DEFAULT_BUSINESS } from "@/lib/business";
 import { SaleReceiptDoc } from "./PrintDocs";
-import logoAsset from "@/assets/firoza-logo.png.asset.json";
+const LOGO_URL = "/firoza-logo.png";
 
 describe("print letterhead logo", () => {
   it("renders the company logo image on printed documents", () => {
@@ -21,6 +21,6 @@ describe("print letterhead logo", () => {
         />
       </LangProvider>,
     );
-    expect(html).toContain(`src="${logoAsset.url}"`);
+    expect(html).toContain(`src="${LOGO_URL}"`);
   });
 });
