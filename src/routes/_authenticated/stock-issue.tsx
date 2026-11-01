@@ -1,0 +1,48 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { useSalesmen } from "@/lib/me";
+import { useT } from "@/lib/i18n";
+import { CartBuilder, type CartLine } from "@/components/CartBuilder";
+import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { PageTitle } from "@/components/Stat";
+
+export const Route = createFileRoute("/_authenticated/stock-issue")({
+  head: () => ({ meta: [{ title: "মাল দেওয়া — মোবাইল হিসাব" }] }),
+  component: StockIssue,
+});
+
+function StockIssue() {
+  const { t } = useT();
+  const qc = useQueryClient();
+  const { data: salesmen = [] } = useSalesmen();
+  const [sid, setSid] = useState("");
+  const [cart, setCart] = useState<CartLine[]>([]);
+
+  async function submit() {
+    if (!sid || !cart.length) return;
+    const { error } = await supabase.rpc("issue_stock", {
+      _salesman: sid,
+      _items: cart.map((l) => ({ product_id: l.product_id, qty: l.qty, imeis: l.imeis })),
+    });
+    if (error) return toast.error(error.message);
+    toast.success(t("done"));
+    setCart([]);
+    qc.invalidateQueries();
+  }
+
+  return (
+    <div className="space-y-4">
+      <PageTitle>{t("stockIssue")}</PageTitle>
+      <Select value={sid} onValueChange={(v) => { setSid(v); setCart([]); }}>
+        <SelectTrigger className="w-72"><SelectValue placeholder={t("selectSalesman")} /></SelectTrigger>
+        <SelectContent>{salesmen.filter((s) => s.active).map((s) => <SelectItem key={s.id} value={s.id}>{s.full_name}</SelectItem>)}</SelectContent>
+      </Select>
+      {sid && <CartBuilder mode="issue" salesmanId={sid} cart={cart} setCart={setCart} />}
+      <Button size="lg" className="w-full" disabled={!sid || !cart.length} onClick={submit}>{t("confirm")}</Button>
+    </div>
+  );
+}
