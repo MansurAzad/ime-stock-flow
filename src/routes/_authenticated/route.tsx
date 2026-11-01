@@ -11,6 +11,7 @@ import { useOnline, usePendingSyncCount } from "@/lib/offline";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import logoAsset from "@/assets/firoza-logo.png.asset.json";
 
 const navIcon: Partial<Record<Key, LucideIcon>> = {
   dashboard: LayoutDashboard,
@@ -63,10 +64,13 @@ function Layout() {
     <div className="min-h-screen pb-20 md:pb-0">
       <header className="sticky top-0 z-20 border-b bg-primary text-primary-foreground">
         <div className="mx-auto grid max-w-6xl grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-3 py-3 sm:px-4">
-          <div className="min-w-0">
+          <div className="flex min-w-0 items-center gap-2.5">
+            <img src={logoAsset.url} alt={t("companyName")} className="h-10 w-10 shrink-0 rounded-md bg-card object-contain p-0.5 sm:h-12 sm:w-12" />
+            <div className="min-w-0">
             <div className="break-words font-display text-base font-bold sm:text-lg">{t("companyName")}</div>
             <div className="break-words text-xs leading-relaxed opacity-90 sm:text-sm">{t("appName")}</div>
             <div className="hidden text-xs opacity-80 sm:block">{t("companyAddress")} · {t("companyPhone")}</div>
+            </div>
           </div>
           <div className="flex shrink-0 items-center gap-1">
             <SyncBadge />
