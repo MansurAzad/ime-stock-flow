@@ -4,6 +4,17 @@ import { useMe } from "@/lib/me";
 import { useT, type Key } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import { useQueryClient } from "@tanstack/react-query";
+import { LayoutDashboard, Package, Users, PackageOpen, HandCoins, ShoppingCart, Store, type LucideIcon } from "lucide-react";
+
+const navIcon: Partial<Record<Key, LucideIcon>> = {
+  dashboard: LayoutDashboard,
+  products: Package,
+  salesmen: Users,
+  stockIssue: PackageOpen,
+  settlement: HandCoins,
+  sales: ShoppingCart,
+  retailers: Store,
+};
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
@@ -61,12 +72,21 @@ function Layout() {
         </div>
       </header>
       <main className="mx-auto max-w-6xl px-4 py-6">{me ? <Outlet /> : null}</main>
-      <nav className="fixed inset-x-0 bottom-0 z-20 flex border-t bg-card md:hidden">
-        {nav.map((n) => (
-          <Link key={n.to} to={n.to} className="flex-1 px-1 py-3 text-center text-xs" activeProps={{ className: "font-bold text-primary" }}>
-            {t(n.k)}
-          </Link>
-        ))}
+      <nav className="fixed inset-x-0 bottom-0 z-20 flex border-t bg-card pb-[env(safe-area-inset-bottom)] shadow-[0_-2px_12px_rgba(0,0,0,0.06)] md:hidden">
+        {nav.map((n) => {
+          const Icon = navIcon[n.k] ?? LayoutDashboard;
+          return (
+            <Link
+              key={n.to}
+              to={n.to}
+              className="flex flex-1 flex-col items-center gap-0.5 px-1 py-2 text-[11px] text-muted-foreground"
+              activeProps={{ className: "font-bold text-primary" }}
+            >
+              <Icon className="h-5 w-5" />
+              <span className="leading-tight">{t(n.k)}</span>
+            </Link>
+          );
+        })}
       </nav>
     </div>
   );
