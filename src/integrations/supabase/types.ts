@@ -14,6 +14,103 @@ export type Database = {
   }
   public: {
     Tables: {
+      dealer_ai_access: {
+        Row: {
+          denial_message: string
+          id: boolean
+          status: number
+          updated_at: string
+        }
+        Insert: {
+          denial_message: string
+          id?: boolean
+          status: number
+          updated_at?: string
+        }
+        Update: {
+          denial_message?: string
+          id?: boolean
+          status?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      dealer_blocks: {
+        Row: {
+          blocked: boolean
+          confirmed_at: string
+          confirmed_by: string
+          retailer_id: string
+        }
+        Insert: {
+          blocked?: boolean
+          confirmed_at?: string
+          confirmed_by: string
+          retailer_id: string
+        }
+        Update: {
+          blocked?: boolean
+          confirmed_at?: string
+          confirmed_by?: string
+          retailer_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dealer_blocks_retailer_id_fkey"
+            columns: ["retailer_id"]
+            isOneToOne: true
+            referencedRelation: "retailers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      dealer_risk_assessments: {
+        Row: {
+          action_bn: string
+          action_en: string
+          assessed_at: string
+          assessed_by: string
+          facts: Json
+          model: string
+          reason_bn: string
+          reason_en: string
+          retailer_id: string
+          score: number
+        }
+        Insert: {
+          action_bn: string
+          action_en: string
+          assessed_at?: string
+          assessed_by: string
+          facts: Json
+          model: string
+          reason_bn: string
+          reason_en: string
+          retailer_id: string
+          score: number
+        }
+        Update: {
+          action_bn?: string
+          action_en?: string
+          assessed_at?: string
+          assessed_by?: string
+          facts?: Json
+          model?: string
+          reason_bn?: string
+          reason_en?: string
+          retailer_id?: string
+          score?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dealer_risk_assessments_retailer_id_fkey"
+            columns: ["retailer_id"]
+            isOneToOne: true
+            referencedRelation: "retailers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       deposits: {
         Row: {
           amount: number
@@ -321,6 +418,7 @@ export type Database = {
         Args: { _imei: string; _mode: string; _salesman: string }
         Returns: Json
       }
+      dealer_risk_history: { Args: never; Returns: Json }
       distribution_dashboard: { Args: never; Returns: Json }
       distribution_insights: { Args: never; Returns: Json }
       distribution_stock_counts: { Args: never; Returns: Json }
@@ -345,6 +443,10 @@ export type Database = {
       }
       return_stock: {
         Args: { _items: Json; _salesman: string }
+        Returns: undefined
+      }
+      set_dealer_block: {
+        Args: { _blocked: boolean; _confirmed: boolean; _retailer: string }
         Returns: undefined
       }
     }
