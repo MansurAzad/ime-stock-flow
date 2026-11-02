@@ -29,6 +29,13 @@
       "when": 1793548247878,
       "tag": "0003_dealer_risk_and_confirmed_blocks",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1793595018147,
+      "tag": "0004_settings_data_management",
+      "breakpoints": true
     }
   ]
 }

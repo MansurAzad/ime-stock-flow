@@ -14,6 +14,63 @@ export type Database = {
   }
   public: {
     Tables: {
+      business_audit: {
+        Row: {
+          action: string
+          actor: string
+          after_data: Json | null
+          before_data: Json | null
+          created_at: string
+          entity: string | null
+          entity_id: string | null
+          id: string
+          reason: string | null
+        }
+        Insert: {
+          action: string
+          actor: string
+          after_data?: Json | null
+          before_data?: Json | null
+          created_at?: string
+          entity?: string | null
+          entity_id?: string | null
+          id?: string
+          reason?: string | null
+        }
+        Update: {
+          action?: string
+          actor?: string
+          after_data?: Json | null
+          before_data?: Json | null
+          created_at?: string
+          entity?: string | null
+          entity_id?: string | null
+          id?: string
+          reason?: string | null
+        }
+        Relationships: []
+      }
+      business_exports: {
+        Row: {
+          actor: string
+          created_at: string
+          id: string
+          snapshot: Json
+        }
+        Insert: {
+          actor: string
+          created_at?: string
+          id?: string
+          snapshot: Json
+        }
+        Update: {
+          actor?: string
+          created_at?: string
+          id?: string
+          snapshot?: Json
+        }
+        Relationships: []
+      }
       dealer_ai_access: {
         Row: {
           denial_message: string
@@ -414,6 +471,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      business_snapshot: { Args: never; Returns: Json }
       check_imei: {
         Args: { _imei: string; _mode: string; _salesman: string }
         Returns: Json
@@ -422,6 +480,7 @@ export type Database = {
       distribution_dashboard: { Args: never; Returns: Json }
       distribution_insights: { Args: never; Returns: Json }
       distribution_stock_counts: { Args: never; Returns: Json }
+      export_business_data: { Args: never; Returns: Json }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -437,9 +496,27 @@ export type Database = {
         Args: { _items: Json; _salesman: string }
         Returns: undefined
       }
+      manage_business_record: {
+        Args: {
+          _action: string
+          _id: string
+          _reason: string
+          _table: string
+          _values: Json
+        }
+        Returns: undefined
+      }
       record_sale: {
         Args: { _items: Json; _paid: number; _retailer: string }
         Returns: string
+      }
+      reset_business_data: {
+        Args: { _backup_id: string; _confirmation: string }
+        Returns: undefined
+      }
+      restore_business_data: {
+        Args: { _backup_id: string; _confirmation: string; _snapshot: Json }
+        Returns: undefined
       }
       return_stock: {
         Args: { _items: Json; _salesman: string }
