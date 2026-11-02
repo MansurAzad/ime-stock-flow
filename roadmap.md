@@ -1,4 +1,8 @@
 # Current tasks
+- [ ] Add settings page with company/account controls and local data management.
+- [ ] Complete safe list CRUD and transaction correction controls.
+- [ ] Add owner-only business-data export/restore and confirmed reset of accounts/list data while preserving login accounts.
+- [ ] Test permissions, restore validation, reset scope and live settings/CRUD workflows.
 - [x] Add branded PDF export to dashboard overdue dues.
 - [x] Add owner-only AI payment-risk ranking from actual dealer history.
 - [x] Require explicit confirmation and enforce dealer blocking securely.
