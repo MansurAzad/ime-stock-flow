@@ -20,6 +20,7 @@ import { Route as AuthenticatedSalesmenRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedSettlementRouteImport } from './routes/_authenticated/settlement'
 import { Route as AuthenticatedStockIssueRouteImport } from './routes/_authenticated/stock-issue'
+import { Route as AuthenticatedUserAccessRouteImport } from './routes/_authenticated/user-access'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -75,6 +76,11 @@ const AuthenticatedStockIssueRoute = AuthenticatedStockIssueRouteImport.update({
   path: '/stock-issue',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedUserAccessRoute = AuthenticatedUserAccessRouteImport.update({
+  id: '/user-access',
+  path: '/user-access',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -87,6 +93,7 @@ export interface FileRoutesByFullPath {
   '/settings': typeof AuthenticatedSettingsRoute
   '/settlement': typeof AuthenticatedSettlementRoute
   '/stock-issue': typeof AuthenticatedStockIssueRoute
+  '/user-access': typeof AuthenticatedUserAccessRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -99,6 +106,7 @@ export interface FileRoutesByTo {
   '/settings': typeof AuthenticatedSettingsRoute
   '/settlement': typeof AuthenticatedSettlementRoute
   '/stock-issue': typeof AuthenticatedStockIssueRoute
+  '/user-access': typeof AuthenticatedUserAccessRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -113,6 +121,7 @@ export interface FileRoutesById {
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/settlement': typeof AuthenticatedSettlementRoute
   '/_authenticated/stock-issue': typeof AuthenticatedStockIssueRoute
+  '/_authenticated/user-access': typeof AuthenticatedUserAccessRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -127,6 +136,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/settlement'
     | '/stock-issue'
+    | '/user-access'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -139,6 +149,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/settlement'
     | '/stock-issue'
+    | '/user-access'
   id:
     | '__root__'
     | '/'
@@ -152,6 +163,7 @@ export interface FileRouteTypes {
     | '/_authenticated/settings'
     | '/_authenticated/settlement'
     | '/_authenticated/stock-issue'
+    | '/_authenticated/user-access'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -239,6 +251,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedStockIssueRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/user-access': {
+      id: '/_authenticated/user-access'
+      path: '/user-access'
+      fullPath: '/user-access'
+      preLoaderRoute: typeof AuthenticatedUserAccessRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
@@ -251,6 +270,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedSettlementRoute: typeof AuthenticatedSettlementRoute
   AuthenticatedStockIssueRoute: typeof AuthenticatedStockIssueRoute
+  AuthenticatedUserAccessRoute: typeof AuthenticatedUserAccessRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -262,6 +282,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedSettlementRoute: AuthenticatedSettlementRoute,
   AuthenticatedStockIssueRoute: AuthenticatedStockIssueRoute,
+  AuthenticatedUserAccessRoute: AuthenticatedUserAccessRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
