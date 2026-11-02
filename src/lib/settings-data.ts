@@ -27,5 +27,5 @@ export function backupCounts(backup: BusinessBackup) {
 export const recordSchema = z.object({
   table: z.enum(["products", "retailers", "profiles", "sales", "retailer_payments", "deposits", "stock_movements", "imei_units"]),
   id: z.string().uuid(), action: z.enum(["update", "delete"]),
-  values: z.record(z.string(), z.unknown()).default({}), reason: z.string().trim().min(3).max(500),
+  values: z.record(z.string(), z.union([z.string(), z.number().finite(), z.boolean(), z.null()])).default({}), reason: z.string().trim().min(3).max(500),
 });

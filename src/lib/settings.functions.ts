@@ -2,13 +2,14 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { backupSchema, recordSchema, RESET_PHRASE, RESTORE_PHRASE } from "@/lib/settings-data";
+import type { Json } from "@/integrations/supabase/types";
 
 export const exportBusinessData = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const { data, error } = await context.supabase.rpc("export_business_data");
     if (error) throw new Error(error.message);
-    return backupSchema.parse(data);
+    return JSON.stringify(backupSchema.parse(data));
   });
 
 export const resetBusinessData = createServerFn({ method: "POST" })
@@ -24,7 +25,7 @@ export const restoreBusinessData = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) => z.object({ confirmation: z.literal(RESTORE_PHRASE), backup: backupSchema, backupId: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
-    const result = await context.supabase.rpc("restore_business_data", { _confirmation: data.confirmation, _snapshot: data.backup, _backup_id: data.backupId });
+    const result = await context.supabase.rpc("restore_business_data", { _confirmation: data.confirmation, _snapshot: JSON.parse(JSON.stringify(data.backup)) as Json, _backup_id: data.backupId });
     if (result.error) throw new Error(result.error.message);
     return { ok: true };
   });
