@@ -64,6 +64,13 @@
       "when": 1793595741573,
       "tag": "0008_access_role_transition_safety",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1793595851975,
+      "tag": "0009_restrict_internal_access_helpers",
+      "breakpoints": true
     }
   ]
 }
