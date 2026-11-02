@@ -36,6 +36,13 @@
       "when": 1793595018147,
       "tag": "0004_settings_data_management",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1793595079536,
+      "tag": "0005_validated_history_cancellation",
+      "breakpoints": true
     }
   ]
 }

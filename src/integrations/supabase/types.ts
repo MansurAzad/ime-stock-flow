@@ -472,6 +472,10 @@ export type Database = {
     }
     Functions: {
       business_snapshot: { Args: never; Returns: Json }
+      cancel_business_history: {
+        Args: { _id: string; _reason: string; _table: string }
+        Returns: undefined
+      }
       check_imei: {
         Args: { _imei: string; _mode: string; _salesman: string }
         Returns: Json
