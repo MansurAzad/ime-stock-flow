@@ -57,4 +57,20 @@ describe("isolated business management database", () => {
     expect((await db.query<{ stock_qty: number }>("SELECT stock_qty FROM products")).rows[0]?.stock_qty).toBe(10);
     expect((await db.query<{ qty: number }>("SELECT holding_qty($1,$2) qty", [sr, product])).rows[0]?.qty).toBe(0);
   });
+  it("retailer CRUD keeps salesman ownership and denies another salesman", async () => {
+    await db.exec(`SELECT set_config('app.user','${sr}',false);`);
+    await db.query("SELECT manage_business_record('retailers',$1,'update',$2::jsonb,'Contact correction')", [retailer, JSON.stringify({ name: "Updated", phone: "123", address: "Test" })]);
+    expect((await db.query<{ name: string; salesman_id: string }>("SELECT name,salesman_id FROM retailers WHERE id=$1", [retailer])).rows[0]).toEqual({ name: "Updated", salesman_id: sr });
+    await db.exec("SELECT set_config('app.user','55555555-5555-4555-8555-555555555555',false);");
+    await expect(db.query("SELECT manage_business_record('retailers',$1,'delete','{}','Delete attempt')", [retailer])).rejects.toThrow("not available");
+    await db.exec(`SELECT set_config('app.user','${owner}',false);`);
+  });
+  it("money updates and deletes retain an audit trail and concrete balances", async () => {
+    const d = (await db.query<{ id: string }>("INSERT INTO deposits(salesman_id,amount) VALUES($1,20) RETURNING id", [sr])).rows[0]?.id;
+    await db.query("SELECT manage_business_record('deposits',$1,'update',$2::jsonb,'Correct amount')", [d, JSON.stringify({ amount: 30, note: "Verified" })]);
+    expect((await db.query<{ amount: string }>("SELECT amount FROM deposits WHERE id=$1", [d])).rows[0]?.amount).toBe("30.00");
+    await db.query("SELECT manage_business_record('deposits',$1,'delete','{}','Cancel duplicate')", [d]);
+    expect((await db.query<{ n: number }>("SELECT count(*)::int n FROM deposits WHERE id=$1", [d])).rows[0]?.n).toBe(0);
+    expect((await db.query<{ n: number }>("SELECT count(*)::int n FROM business_audit WHERE entity_id=$1", [d])).rows[0]?.n).toBe(2);
+  });
 });

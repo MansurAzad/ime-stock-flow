@@ -29,3 +29,4 @@
 - Vercel builds switch Nitro to the 'vercel' preset only when VERCEL is set (vite.config.ts); default Cloudflare target stays for Lovable publishing.
 - Settings business backups are owner-only atomic PostgreSQL snapshots of an explicit application-table allowlist; restore accepts unchanged same-installation exports only, preserves auth/audit/export history, and never reapplies dealer blocks or AI advice without fresh confirmation. Full database/account backups remain Cloud exports.
 - Reset and restore require typed confirmation and a recent unchanged safety export; all destructive account corrections are owner-only audited RPCs, while retailer contact CRUD also permits its owning salesman.
+- Offline replay is single-flight and removes only completed queue IDs so manual sync and reconnect cannot double-send or discard concurrently queued entries.

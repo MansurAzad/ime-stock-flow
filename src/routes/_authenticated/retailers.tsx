@@ -5,7 +5,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { FileSpreadsheet, Printer } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { useMe, useRetailers } from "@/lib/me";
+import { useMe, useRetailers, useSalesmen } from "@/lib/me";
 import { useT } from "@/lib/i18n";
 import { money } from "@/lib/imei";
 import { exportCsv } from "@/lib/export";
@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PageTitle } from "@/components/Stat";
 import { RecordActions } from "@/components/RecordActions";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 type SaleRow = { id: string; created_at: string; total: number; paid: number; retailer_id: string };
 type PayRow = { id: string; created_at: string; amount: number; note: string | null; retailer_id: string };
@@ -31,6 +32,8 @@ function Retailers() {
   const { t } = useT();
   const qc = useQueryClient();
   const { data: me } = useMe();
+  const { data: salesmen = [] } = useSalesmen();
+  const [salesmanId, setSalesmanId] = useState("");
   const online = useOnline();
   const { data: retailers = [] } = useRetailers();
   const [business] = useBusiness();
@@ -69,7 +72,8 @@ function Retailers() {
   async function add(e: React.FormEvent) {
     e.preventDefault();
     if (!me) return;
-    const result = await runOrQueue({ kind: "add_retailer", payload: { ...f, salesman_id: me.id } }, !online);
+    if (me.isAdmin && !salesmanId) { toast.error(t("selectSalesman")); return; }
+    const result = await runOrQueue({ kind: "add_retailer", payload: { ...f, salesman_id: me.isAdmin ? salesmanId : me.id } }, !online);
     if (result.s === "error") { toast.error(result.error); return; }
     if (result.s === "queued") toast.success(t("savedOffline"));
     setF({ name: "", phone: "", address: "" });
@@ -126,6 +130,7 @@ function Retailers() {
       </div>
       {me && (
         <form onSubmit={add} className="grid gap-3 rounded-xl border bg-card p-4 md:grid-cols-4">
+          {me.isAdmin && <Select value={salesmanId} onValueChange={setSalesmanId}><SelectTrigger><SelectValue placeholder={t("selectSalesman")} /></SelectTrigger><SelectContent>{salesmen.map((s) => <SelectItem key={s.id} value={s.id}>{s.full_name}</SelectItem>)}</SelectContent></Select>}
           <Input required placeholder={t("name")} value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} />
           <Input placeholder={t("phone")} value={f.phone} onChange={(e) => setF({ ...f, phone: e.target.value })} />
           <Input placeholder={t("address")} value={f.address} onChange={(e) => setF({ ...f, address: e.target.value })} />
