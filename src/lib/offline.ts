@@ -90,18 +90,26 @@ export async function runOrQueue(op: QueuedOp, offline: boolean): Promise<RunRes
 }
 
 /** Replay every queued entry in order; stop at the first server rejection so order is preserved. */
-export async function replayQueue(): Promise<{ synced: number; failed: string | null }> {
+let replayInFlight: Promise<{ synced: number; failed: string | null }> | null = null;
+export function replayQueue(): Promise<{ synced: number; failed: string | null }> {
+  if (replayInFlight) return replayInFlight;
+  replayInFlight = replayQueueOnce().finally(() => { replayInFlight = null; });
+  return replayInFlight;
+}
+async function replayQueueOnce(): Promise<{ synced: number; failed: string | null }> {
   const entries = getQueue();
   let synced = 0;
   for (const entry of entries) {
     const { error } = await runOp(entry.op);
     if (error) {
-      saveQueue(entries.slice(synced));
+      const completed = new Set(entries.slice(0, synced).map((e) => e.id));
+      saveQueue(getQueue().filter((e) => !completed.has(e.id)));
       return { synced, failed: error.message };
     }
     synced += 1;
   }
-  saveQueue([]);
+  const completed = new Set(entries.map((e) => e.id));
+  saveQueue(getQueue().filter((e) => !completed.has(e.id)));
   return { synced, failed: null };
 }
 

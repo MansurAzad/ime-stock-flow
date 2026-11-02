@@ -17,6 +17,7 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { PageTitle } from "@/components/Stat";
 import { useQuery } from "@tanstack/react-query";
+import { RecordActions } from "@/components/RecordActions";
 
 export const Route = createFileRoute("/_authenticated/products")({
   beforeLoad: requireAdmin,
@@ -121,6 +122,7 @@ function Products() {
               <div className="text-right"><div className="text-xs text-muted-foreground">{t("stock")}</div><div className="font-display text-2xl font-bold">{p.is_smartphone ? counts[p.id] ?? 0 : p.stock_qty}</div></div>
             </div>
             <div className="mt-3 flex gap-2">
+              <RecordActions table="products" id={p.id} fields={[{ key: "name", label: "name", value: p.name }, { key: "model", label: "model", value: p.model }, { key: "price", label: "price", value: Number(p.price), type: "number" }]} />
               {p.is_smartphone ? (
                 <Button size="sm" variant="secondary" onClick={() => setImeiFor(p.id)}>{t("addImei")}</Button>
               ) : (
