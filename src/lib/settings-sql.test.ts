@@ -18,6 +18,7 @@ describe("isolated business management database", () => {
     await db.exec(readFileSync("drizzle/migrations/0005_validated_history_cancellation.sql", "utf8"));
     await db.exec(`INSERT INTO auth.users(id) VALUES('${owner}'),('${sr}'); SELECT set_config('app.user','${owner}',false); INSERT INTO products(id,name,price,is_smartphone,stock_qty) VALUES('${product}','Test product',100,false,10); INSERT INTO retailers(id,name,salesman_id) VALUES('${retailer}','Test retailer','${sr}');`);
     await db.query("SELECT issue_stock($1,$2::jsonb)", [sr, JSON.stringify([{ product_id: product, qty: 2 }])]);
+    await db.query("SELECT set_dealer_block($1,true,true)", [retailer]);
     backup = (await db.query<{ snapshot: typeof backup }>("SELECT export_business_data() snapshot")).rows[0]?.snapshot as typeof backup;
   }, 60000);
   afterAll(async () => { await db?.close(); });
@@ -44,6 +45,7 @@ describe("isolated business management database", () => {
     await db.query("SELECT restore_business_data('RESTORE FIROZA',$1::jsonb,$2)", [JSON.stringify({ format: "firoza-business-data", version: 1, ...backup }), safety?.source]);
     expect((await db.query<{ stock_qty: number }>("SELECT stock_qty FROM products")).rows[0]?.stock_qty).toBe(8);
     expect((await db.query<{ qty: number }>("SELECT holding_qty($1,$2) qty", [sr, product])).rows[0]?.qty).toBe(2);
+    expect((await db.query<{ n: number }>("SELECT count(*)::int n FROM dealer_blocks")).rows[0]?.n).toBe(0);
   });
   it("rejects modified backups without changing current stock", async () => {
     const safety = (await db.query<{ snapshot: { source: string } }>("SELECT export_business_data() snapshot")).rows[0]?.snapshot;

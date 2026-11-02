@@ -1,9 +1,12 @@
-import { beforeEach, describe, expect, it } from "vitest";
-import { enqueueOp, getQueue, isNetworkFailure } from "./offline";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { enqueueOp, getQueue, isNetworkFailure, replayQueue } from "./offline";
+const { insert } = vi.hoisted(() => ({ insert: vi.fn() }));
+vi.mock("@/integrations/supabase/client", () => ({ supabase: { from: () => ({ insert }), rpc: vi.fn() } }));
 
 describe("offline queue", () => {
   beforeEach(() => {
     window.localStorage.clear();
+    insert.mockReset();
   });
 
   it("stores entries in order with timestamps", () => {
@@ -21,7 +24,8 @@ describe("offline queue", () => {
     // Simulate a fresh page load: module state is irrelevant, storage is the source.
     const raw = window.localStorage.getItem("offline-queue-v1");
     expect(raw).toBeTruthy();
-    const parsed = JSON.parse(raw!);
+    if (!raw) throw new Error("Queue was not saved");
+    const parsed = JSON.parse(raw);
     expect(parsed[0].op.payload.name).toBe("Test");
   });
 
@@ -32,5 +36,20 @@ describe("offline queue", () => {
     expect(isNetworkFailure({ message: "admin only" }, false)).toBe(false);
     // Anything is treated as network failure when the browser says it is offline.
     expect(isNetworkFailure({ message: "admin only" }, true)).toBe(true);
+  });
+  it("manual sync and reconnect share one replay and retain entries queued during replay", async () => {
+    let finish: ((value: { error: null }) => void) | undefined;
+    insert.mockImplementation(() => new Promise((resolve) => { finish = resolve; }));
+    enqueueOp({ kind: "deposit", payload: { salesman_id: "s1", amount: 500, note: null } });
+    const first = replayQueue();
+    const second = replayQueue();
+    expect(first).toBe(second);
+    enqueueOp({ kind: "deposit", payload: { salesman_id: "s1", amount: 200, note: null } });
+    if (!finish) throw new Error("Replay did not start");
+    finish({ error: null });
+    await first;
+    expect(insert).toHaveBeenCalledTimes(1);
+    expect(getQueue()).toHaveLength(1);
+    expect(getQueue()[0]?.op.payload).toEqual({ salesman_id: "s1", amount: 200, note: null });
   });
 });
