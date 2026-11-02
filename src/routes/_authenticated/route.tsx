@@ -4,7 +4,7 @@ import { useMe } from "@/lib/me";
 import { useT, type Key } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import { useQueryClient } from "@tanstack/react-query";
-import { LayoutDashboard, Menu, Package, Users, PackageOpen, HandCoins, ShoppingCart, Store, Settings2, type LucideIcon } from "lucide-react";
+import { LayoutDashboard, Menu, Package, Users, PackageOpen, HandCoins, ShoppingCart, Store, Settings2, ShieldCheck, type LucideIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useBusiness } from "@/lib/business";
 import { useOnline, usePendingSyncCount } from "@/lib/offline";
@@ -26,6 +26,7 @@ const navIcon: Partial<Record<Key, LucideIcon>> = {
   sales: ShoppingCart,
   retailers: Store,
   settings: Settings2,
+  userAccess: ShieldCheck,
 };
 
 export const Route = createFileRoute("/_authenticated")({
@@ -46,6 +47,7 @@ const adminNav: { to: string; k: Key }[] = [
   { to: "/settlement", k: "settlement" },
   { to: "/retailers", k: "retailers" },
   { to: "/settings", k: "settings" },
+  { to: "/user-access", k: "userAccess" },
 ];
 const salesNav: { to: string; k: Key }[] = [
   { to: "/dashboard", k: "dashboard" },
@@ -94,7 +96,7 @@ function Layout() {
           </nav>
         </div>
       </header>
-      <main className="mx-auto min-w-0 max-w-6xl px-3 py-5 sm:px-4">{me ? <Outlet /> : null}</main>
+      <main className="mx-auto min-w-0 max-w-6xl px-3 py-5 sm:px-4">{me?.active ? <Outlet /> : me ? <p className="text-destructive">{t("accountDisabled")}</p> : null}</main>
       <MobileNav nav={nav} />
     </div>
   );

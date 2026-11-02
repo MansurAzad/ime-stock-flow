@@ -1,8 +1,9 @@
 import { useQuery, type QueryClient } from "@tanstack/react-query";
 import { redirect } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
+import { DEFAULT_PERMISSIONS, type AccessPermissions } from "@/lib/access";
 
-export type Me = { id: string; email: string | undefined; isAdmin: boolean; profile: { full_name: string } | null };
+export type Me = { id: string; email: string | undefined; isAdmin: boolean; active: boolean; permissions: AccessPermissions; profile: { full_name: string; active: boolean } | null };
 
 /**
  * Current user + role, cached so guards and pages share one fetch.
@@ -15,12 +16,18 @@ export const meQueryOptions = {
     const { data: s } = await supabase.auth.getSession();
     const user = s.session?.user;
     if (!user) return null;
-    const [{ data: roles }, { data: profile }] = await Promise.all([
+    const [{ data: roles }, { data: profile }, { data: override }] = await Promise.all([
       supabase.from("user_roles").select("role").eq("user_id", user.id),
-      supabase.from("profiles").select("full_name").eq("id", user.id).maybeSingle(),
+      supabase.from("profiles").select("full_name,active").eq("id", user.id).maybeSingle(),
+      supabase.from("user_permission_overrides").select("permissions").eq("user_id", user.id).maybeSingle(),
     ]);
     const isAdmin = !!roles?.some((r) => r.role === "admin");
-    return { id: user.id, email: user.email, isAdmin, profile };
+    const active = profile?.active === true;
+    const permissions = { ...DEFAULT_PERMISSIONS };
+    const saved = override?.permissions;
+    if (saved && typeof saved === "object" && !Array.isArray(saved)) for (const key of Object.keys(permissions) as (keyof AccessPermissions)[]) if (typeof saved[key] === "boolean") permissions[key] = saved[key];
+    if (!active) for (const key of Object.keys(permissions) as (keyof AccessPermissions)[]) permissions[key] = false;
+    return { id: user.id, email: user.email, isAdmin: active && isAdmin, active, permissions, profile };
   },
 };
 
@@ -32,7 +39,7 @@ export async function requireAdmin({ context }: { context: { queryClient: QueryC
 }
 
 export function useMe() {
-  return useQuery(meQueryOptions);
+  return useQuery({ ...meQueryOptions, refetchInterval: 30_000 });
 }
 
 export function useSalesmen() {
