@@ -57,6 +57,13 @@
       "when": 1793595666943,
       "tag": "0007_access_read_and_profile_guards",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1793595741573,
+      "tag": "0008_access_role_transition_safety",
+      "breakpoints": true
     }
   ]
 }
