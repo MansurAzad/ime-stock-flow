@@ -50,6 +50,13 @@
       "when": 1793595570135,
       "tag": "0006_user_roles_access_control",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1793595666943,
+      "tag": "0007_access_read_and_profile_guards",
+      "breakpoints": true
     }
   ]
 }
