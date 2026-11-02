@@ -43,6 +43,13 @@
       "when": 1793595079536,
       "tag": "0005_validated_history_cancellation",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1793595570135,
+      "tag": "0006_user_roles_access_control",
+      "breakpoints": true
     }
   ]
 }
