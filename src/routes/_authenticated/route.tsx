@@ -25,6 +25,7 @@ const navIcon: Partial<Record<Key, LucideIcon>> = {
   settlement: HandCoins,
   sales: ShoppingCart,
   retailers: Store,
+  settings: Settings2,
 };
 
 export const Route = createFileRoute("/_authenticated")({
@@ -44,12 +45,14 @@ const adminNav: { to: string; k: Key }[] = [
   { to: "/stock-issue", k: "stockIssue" },
   { to: "/settlement", k: "settlement" },
   { to: "/retailers", k: "retailers" },
+  { to: "/settings", k: "settings" },
 ];
 const salesNav: { to: string; k: Key }[] = [
   { to: "/dashboard", k: "dashboard" },
   { to: "/sales", k: "sales" },
   { to: "/retailers", k: "retailers" },
   { to: "/settlement", k: "settlement" },
+  { to: "/settings", k: "settings" },
 ];
 
 function Layout() {

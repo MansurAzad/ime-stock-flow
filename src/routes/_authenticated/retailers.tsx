@@ -16,6 +16,7 @@ import { LedgerDoc, MoneyReceiptDoc, PrintSheet, SaleReceiptDoc } from "@/compon
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PageTitle } from "@/components/Stat";
+import { RecordActions } from "@/components/RecordActions";
 
 type SaleRow = { id: string; created_at: string; total: number; paid: number; retailer_id: string };
 type PayRow = { id: string; created_at: string; amount: number; note: string | null; retailer_id: string };
@@ -123,7 +124,7 @@ function Retailers() {
           <FileSpreadsheet className="mr-1 h-4 w-4" />{t("export")}
         </Button>
       </div>
-      {!me?.isAdmin && (
+      {me && (
         <form onSubmit={add} className="grid gap-3 rounded-xl border bg-card p-4 md:grid-cols-4">
           <Input required placeholder={t("name")} value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} />
           <Input placeholder={t("phone")} value={f.phone} onChange={(e) => setF({ ...f, phone: e.target.value })} />
@@ -156,6 +157,7 @@ function Retailers() {
                 <div className="mt-3 space-y-3 border-t pt-3">
                   {!me?.isAdmin && <PaymentForm retailerId={r.id} max={total - paid} />}
                   <div className="flex flex-wrap gap-2">
+                    <RecordActions table="retailers" id={r.id} fields={[{ key: "name", label: "name", value: r.name }, { key: "phone", label: "phone", value: r.phone }, { key: "address", label: "address", value: r.address }]} />
                     <Button size="sm" variant="secondary" onClick={() => exportOne(r)}><FileSpreadsheet className="mr-1 h-4 w-4" />{t("export")}</Button>
                     <Button size="sm" variant="secondary" onClick={() => printLedger(r)}><Printer className="mr-1 h-4 w-4" />{t("print")}</Button>
                   </div>

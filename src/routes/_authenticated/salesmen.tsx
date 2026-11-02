@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { PageTitle } from "@/components/Stat";
 import { SalesmanSummary } from "@/components/SalesmanSummary";
+import { RecordActions } from "@/components/RecordActions";
 
 export const Route = createFileRoute("/_authenticated/salesmen")({
   beforeLoad: requireAdmin,
@@ -38,7 +39,8 @@ function Salesmen() {
     } catch (err) { toast.error((err as Error).message); }
   }
   async function toggle(id: string, active: boolean) {
-    await supabase.from("profiles").update({ active }).eq("id", id);
+    const { error } = await supabase.from("profiles").update({ active }).eq("id", id);
+    if (error) { toast.error(error.message); return; }
     qc.invalidateQueries({ queryKey: ["salesmen"] });
   }
 
@@ -49,7 +51,7 @@ function Salesmen() {
         <Input required placeholder={t("fullName")} value={f.full_name} onChange={(e) => setF({ ...f, full_name: e.target.value })} />
         <Input placeholder={t("phone")} value={f.phone} onChange={(e) => setF({ ...f, phone: e.target.value })} />
         <Input required type="email" placeholder={t("email")} value={f.email} onChange={(e) => setF({ ...f, email: e.target.value })} />
-        <Input required minLength={6} placeholder={t("password")} value={f.password} onChange={(e) => setF({ ...f, password: e.target.value })} />
+        <Input required type="password" minLength={6} placeholder={t("password")} value={f.password} onChange={(e) => setF({ ...f, password: e.target.value })} />
         <Button>{t("newSalesman")}</Button>
       </form>
       <div className="space-y-3">
@@ -61,6 +63,7 @@ function Salesmen() {
                 <div className="text-sm text-muted-foreground">{s.phone}</div>
               </button>
               <label className="flex items-center gap-2 text-sm">{t("active")}<Switch checked={s.active} onCheckedChange={(v) => toggle(s.id, v)} /></label>
+              <RecordActions table="profiles" id={s.id} fields={[{ key: "full_name", label: "fullName", value: s.full_name }, { key: "phone", label: "phone", value: s.phone }]} />
             </div>
             {open === s.id && <div className="mt-4"><SalesmanSummary salesmanId={s.id} /></div>}
           </div>
