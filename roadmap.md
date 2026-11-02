@@ -1,7 +1,7 @@
 # Current tasks
-- [ ] Add owner-only user roles and access page with search, filters, confirmation and audit history.
-- [ ] Enforce active accounts and salesman action permissions in database, RPCs and UI without widening owner-only actions.
-- [ ] Verify permission changes, self-lockout protection, isolated database tests and authenticated page flow.
+- [x] Add owner-only user roles and access page with search, filters, confirmation and audit history.
+- [x] Enforce active accounts and salesman action permissions in database, RPCs and UI without widening owner-only actions; revoke anonymous internal RPC access.
+- [x] Verify permission changes, self-lockout protection and inactive RLS in isolated tests; save unchanged requesting-owner permissions and read audit through desktop/mobile UI. Initial sign-in hydration emits recoverable preview warnings; access-page interactions emit none.
 - [x] Add settings page with company/account controls and local data management.
 - [x] Complete safe list CRUD and audited owner transaction cancellation/correction controls; historical master lists are protected and salesman accounts use deactivation.
 - [x] Add owner-only business-data export/restore and confirmed reset of accounts/list data while preserving login accounts; full database/account exports remain in Cloud.
