@@ -20,7 +20,7 @@ export function createAppPersister() {
 export function shouldPersistQuery(query: { state: { status: string }; queryKey: readonly unknown[] }): boolean {
   if (query.state.status !== "success") return false;
   const key = String(query.queryKey[0] ?? "");
-  return key !== "me" && !key.includes("risk");
+  return key !== "me" && !key.includes("risk") && !key.startsWith("user-access");
 }
 
 /** True when this browser has never cached app data (used by the first-open offline gate). */

@@ -45,7 +45,7 @@ function Settlement() {
         <>
           <SalesmanSummary salesmanId={sid} />
           <ReportBox salesmanId={sid} salesmanName={name} />
-          <ReturnBox key={"r" + sid} salesmanId={sid} />
+          {(me.isAdmin || me.permissions.returns) && <ReturnBox key={"r" + sid} salesmanId={sid} />}
           {me.isAdmin && <DepositBox key={"d" + sid} salesmanId={sid} />}
           <DepositHistory salesmanId={sid} salesmanName={name} />
         </>

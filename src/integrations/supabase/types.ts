@@ -448,6 +448,35 @@ export type Database = {
           },
         ]
       }
+      user_permission_overrides: {
+        Row: {
+          permissions: Json
+          updated_at: string
+          updated_by: string
+          user_id: string
+        }
+        Insert: {
+          permissions?: Json
+          updated_at?: string
+          updated_by: string
+          user_id: string
+        }
+        Update: {
+          permissions?: Json
+          updated_at?: string
+          updated_by?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_permission_overrides_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           id: string
@@ -510,6 +539,17 @@ export type Database = {
         }
         Returns: undefined
       }
+      manage_user_access: {
+        Args: {
+          _active: boolean
+          _confirmed: boolean
+          _permissions: Json
+          _reason: string
+          _role: Database["public"]["Enums"]["app_role"]
+          _user: string
+        }
+        Returns: undefined
+      }
       record_sale: {
         Args: { _items: Json; _paid: number; _retailer: string }
         Returns: string
@@ -530,6 +570,11 @@ export type Database = {
         Args: { _blocked: boolean; _confirmed: boolean; _retailer: string }
         Returns: undefined
       }
+      user_can: {
+        Args: { _permission: string; _user: string }
+        Returns: boolean
+      }
+      user_is_active: { Args: { _user: string }; Returns: boolean }
     }
     Enums: {
       app_role: "admin" | "salesman"
