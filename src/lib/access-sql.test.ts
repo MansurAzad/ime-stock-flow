@@ -7,7 +7,7 @@ describe("user role and action enforcement", () => {
  beforeAll(async()=>{
   db=new PGlite();
   await db.exec(`CREATE ROLE anon; CREATE ROLE authenticated; CREATE ROLE service_role; CREATE SCHEMA auth; CREATE TABLE auth.users(id uuid PRIMARY KEY,raw_user_meta_data jsonb DEFAULT '{}'); CREATE FUNCTION auth.uid() RETURNS uuid LANGUAGE sql AS $$ SELECT nullif(current_setting('app.user',true),'')::uuid $$;`);
-  for(const file of ["0000_migration.sql","0003_dealer_risk_and_confirmed_blocks.sql","0004_settings_data_management.sql","0005_validated_history_cancellation.sql","0006_user_roles_access_control.sql","0007_access_read_and_profile_guards.sql"]) { if(file==="0003_dealer_risk_and_confirmed_blocks.sql") await db.exec("ALTER TABLE products ADD COLUMN low_stock_threshold integer NOT NULL DEFAULT 0"); await db.exec(readFileSync(`drizzle/migrations/${file}`,"utf8")); }
+  for(const file of ["0000_migration.sql","0003_dealer_risk_and_confirmed_blocks.sql","0004_settings_data_management.sql","0005_validated_history_cancellation.sql","0006_user_roles_access_control.sql","0007_access_read_and_profile_guards.sql","0008_access_role_transition_safety.sql"]) { if(file==="0003_dealer_risk_and_confirmed_blocks.sql") await db.exec("ALTER TABLE products ADD COLUMN low_stock_threshold integer NOT NULL DEFAULT 0"); await db.exec(readFileSync(`drizzle/migrations/${file}`,"utf8")); }
   await db.exec(`INSERT INTO auth.users(id) VALUES('${owner}'),('${sr}'); SELECT set_config('app.user','${owner}',false); INSERT INTO products(id,name,is_smartphone,stock_qty,price) VALUES('${product}','Stock',false,10,100); INSERT INTO retailers(id,name,salesman_id) VALUES('${retailer}','Shop','${sr}');`);
   await db.query("SELECT issue_stock($1,$2::jsonb)",[sr,JSON.stringify([{product_id:product,qty:3}])]);
  },60000);
@@ -36,7 +36,8 @@ describe("user role and action enforcement", () => {
  it("inactive users cannot self-reactivate, mutate stock or read business data via RLS",async()=>{
   await set(false); await as(sr);
   await expect(db.query("UPDATE profiles SET active=true WHERE id=$1",[sr])).rejects.toThrow("Only owner");
-  await expect(db.query("SELECT return_stock($1,$2::jsonb)",[sr,JSON.stringify([{product_id:product,qty:1}])])).rejects.toThrow("inactive");
+  await expect(db.query("SELECT return_stock($1,$2::jsonb)",[sr,JSON.stringify([{product_id:product,qty:1}])])).rejects.toThrow("Return more than held");
+  expect((await db.query<{n:number}>("SELECT count(*)::int n FROM stock_movements WHERE kind='return'")).rows[0]?.n).toBe(0);
   await db.exec("GRANT USAGE ON SCHEMA auth TO authenticated; GRANT EXECUTE ON FUNCTION auth.uid() TO authenticated; SET ROLE authenticated;");
   expect((await db.query<{n:number}>("SELECT count(*)::int n FROM products")).rows[0]?.n).toBe(0);
   await db.exec("RESET ROLE;");
