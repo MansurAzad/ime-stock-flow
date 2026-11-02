@@ -128,7 +128,7 @@ function Retailers() {
           <FileSpreadsheet className="mr-1 h-4 w-4" />{t("export")}
         </Button>
       </div>
-      {me && (
+      {me && (me.isAdmin || me.permissions.retailer_manage) && (
         <form onSubmit={add} className="grid gap-3 rounded-xl border bg-card p-4 md:grid-cols-4">
           {me.isAdmin && <Select value={salesmanId} onValueChange={setSalesmanId}><SelectTrigger><SelectValue placeholder={t("selectSalesman")} /></SelectTrigger><SelectContent>{salesmen.map((s) => <SelectItem key={s.id} value={s.id}>{s.full_name}</SelectItem>)}</SelectContent></Select>}
           <Input required placeholder={t("name")} value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} />
@@ -160,9 +160,9 @@ function Retailers() {
               </button>
               {open === r.id && (
                 <div className="mt-3 space-y-3 border-t pt-3">
-                  {!me?.isAdmin && <PaymentForm retailerId={r.id} max={total - paid} />}
+                  {!me?.isAdmin && me?.permissions.collect_payment && <PaymentForm retailerId={r.id} max={total - paid} />}
                   <div className="flex flex-wrap gap-2">
-                    <RecordActions table="retailers" id={r.id} fields={[{ key: "name", label: "name", value: r.name }, { key: "phone", label: "phone", value: r.phone }, { key: "address", label: "address", value: r.address }]} />
+                    {(me?.isAdmin || me?.permissions.retailer_manage) && <RecordActions table="retailers" id={r.id} fields={[{ key: "name", label: "name", value: r.name }, { key: "phone", label: "phone", value: r.phone }, { key: "address", label: "address", value: r.address }]} />}
                     <Button size="sm" variant="secondary" onClick={() => exportOne(r)}><FileSpreadsheet className="mr-1 h-4 w-4" />{t("export")}</Button>
                     <Button size="sm" variant="secondary" onClick={() => printLedger(r)}><Printer className="mr-1 h-4 w-4" />{t("print")}</Button>
                   </div>

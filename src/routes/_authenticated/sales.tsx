@@ -40,6 +40,7 @@ function Sales() {
   const held = summary?.products.filter((p) => p.hand > 0).map((p) => p.product_id) ?? [];
 
   async function submit() {
+    if (!me?.active || (!me.isAdmin && !me.permissions.sales)) return;
     const result = await runOrQueue(
       {
         kind: "record_sale",
@@ -92,7 +93,7 @@ function Sales() {
         <div className="space-y-1"><Label>{t("paid")}</Label><Input type="number" value={paid} onChange={(e) => setPaid(e.target.value)} /></div>
         <div className="text-right"><div className="text-xs text-muted-foreground">{t("due")}</div><div className="font-display text-2xl font-bold text-destructive">{money(total - Number(paid || 0))}</div></div>
       </div>
-      <Button size="lg" className="w-full" disabled={!rid || !cart.length || Number(paid || 0) > total} onClick={submit}>{t("confirm")}</Button>
+      <Button size="lg" className="w-full" disabled={(!me.isAdmin && !me.permissions.sales) || !rid || !cart.length || Number(paid || 0) > total} onClick={submit}>{t("confirm")}</Button>
       {printDoc && <PrintSheet onDone={() => setPrintDoc(null)}>{printDoc}</PrintSheet>}
     </div>
   );
